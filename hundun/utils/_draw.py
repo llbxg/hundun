@@ -62,17 +62,29 @@ class Drawing(object):
 
         _rcParams.update(config)
 
-        subplot_kw= dict(projection='3d') if three else {}
         alphabets = _cycle(_string.ascii_lowercase)
-        fig, axis = _plt.subplots(nrows=rows, ncols=cols,
-                                dpi=150, figsize=(figsize_w, figsize_h),
-                                subplot_kw=subplot_kw)
 
-        if not isinstance(axis, _np.ndarray):
-            axis = _np.array([[axis]])
-        else:
-            if rows==1 or cols==1:
-                axis = axis.reshape((rows, cols))
+        if isinstance(three, int):
+            three = tuple([three])
+        three = three or ()
+
+        fig = _plt.figure(dpi=150, figsize=(figsize_w, figsize_h))
+
+        axis = []
+        for j in range(1, rows*cols+1):
+            s = (rows, cols, j)
+            kwargs = dict()
+
+            if j in three:
+                kwargs['projection']='3d'
+
+            ax = fig.add_subplot(*s, **kwargs)
+            axis.append(ax)
+
+        axis = _np.array(axis)
+
+        if rows==1 or cols==1:
+            axis = axis.reshape((rows, cols))
 
         if number:
             for ax in _np.ravel(axis):
