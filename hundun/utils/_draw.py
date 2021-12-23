@@ -46,8 +46,6 @@ config = {
     'grid.linewidth':0.5
     }
 
-_rcParams.update(config)
-
 
 def _set_axis_label(ax, *xyz_labels, tex=True):
     for axis, label in zip(['x', 'y', 'z'], xyz_labels):
@@ -61,6 +59,9 @@ class Drawing(object):
 
     def __init__(self, rows=1, cols=1, number=False, three=False,
                  figsize_w=3.14*1.7*2, figsize_h=3.14*2):
+
+        _rcParams.update(config)
+
         subplot_kw= dict(projection='3d') if three else {}
         alphabets = _cycle(_string.ascii_lowercase)
         fig, axis = _plt.subplots(nrows=rows, ncols=cols,
