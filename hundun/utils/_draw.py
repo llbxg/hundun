@@ -58,7 +58,13 @@ def _set_axis_label(ax, *xyz_labels, tex=True):
 class Drawing(object):
 
     def __init__(self, rows=1, cols=1, number=False, three=False,
-                 figsize_w=3.14*1.7*2, figsize_h=3.14*2):
+                 figsize=None, dpi=150, space=None):
+
+        if figsize is None:
+            if rows <= cols:
+                figsize = (3.14*1.7*2, 3.14*2)
+            else:
+                figsize = (3.14*2, 3.14*1.7*2)
 
         _rcParams.update(config)
 
@@ -68,7 +74,15 @@ class Drawing(object):
             three = tuple([three])
         three = three or ()
 
-        fig = _plt.figure(dpi=150, figsize=(figsize_w, figsize_h))
+        fig = _plt.figure(dpi=dpi, figsize=figsize)
+
+        if three:
+            _plt.subplots_adjust(wspace=0.4)
+
+        if space is not None:
+            _plt.subplots_adjust(wspace=space[0] ,hspace=space[1])
+
+
 
         axis = []
         for j in range(1, rows*cols+1):
