@@ -41,23 +41,17 @@ class Lorenz(Differential):
 
 Various methods can be used by creating an instance of `Lorenz`.
 As a test, use `.solve_n_times` to solve the equation in 5000 steps.
-(This method uses RK4 by default.) Also, you can easily draw by using `Drawing` of utils.
+(This method uses RK4 by default.) 
 
 ```python
-from hundun.utils import Drawing
-
 l = Lorenz.on_attractor()
 l.solve_n_times(5000)
-u_seq = l.u_seq
-
-d = Drawing(three=True)
-d[0,0].plot(u_seq[:, 0], u_seq[:, 1], u_seq[:, 2])
-d[0,0].set_axis_label('x', 'y', 'z')
-d.show()
 ```
-![fig:lorenz](docs/img/sample_lorenz.png)
 
-It is possible to calculate the Lyapunov exponent(spectrum) from the orbit using `Lorenz` above.
+At this time, you can get the time and orbit by using `.t_seq` and `.u_seq`.
+
+
+It is possible to calculate the **Lyapunov exponent**(spectrum) from the orbit using `Lorenz` above.
 In addition, a calculation method based on QR decomposition can be used by defining `jacobian()`(Jacoby matrix).
 
 ```python
@@ -79,16 +73,29 @@ class Lorenz2(Lorenz):
 from hundun.lyapunov import calc_les
 
 les_seq, les = calc_les(Lorenz2)
+```
 
-d = Drawing()
+
+Also, you can easily draw by using `Drawing` of utils.
+
+```python
+from hundun.utils import Drawing
+
+d = Drawing(1, 2, three=1, number=True)
+
+d[0,0].plot(l.u_seq[:,0], l.u_seq[:,1], l.u_seq[:,2])
+d[0,0].set_axis_label('x', 'y', 'z')
+
 for i in range(3):
-    d[0,0].plot(les_seq[:, i], label=fr'$\lambda_{i+1}=${les[i]:>+8.3f}')
-d[0,0].legend()
-d[0,0].set_axis_label('step', '\lambda')
+    d[0,1].plot(les_seq[:, i], label=fr'$\lambda_{i+1}=${les[i]:>+8.3f}')
+d[0,1].legend(loc='center right')
+d[0,1].set_axis_label('step', r'\lambda')
+
 d.show()
 ```
 
-![fig:les](docs/img/sample_les.png)
+![fig:lorenz](docs/img/sample_lorenz_les.png)
+
 
 Currently, time series analysis methods are being added!
 
