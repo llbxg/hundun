@@ -46,8 +46,6 @@ config = {
     'grid.linewidth':0.5
     }
 
-_rcParams.update(config)
-
 
 def _set_axis_label(ax, *xyz_labels, tex=True):
     for axis, label in zip(['x', 'y', 'z'], xyz_labels):
@@ -60,18 +58,47 @@ def _set_axis_label(ax, *xyz_labels, tex=True):
 class Drawing(object):
 
     def __init__(self, rows=1, cols=1, number=False, three=False,
-                 figsize_w=3.14*1.7*2, figsize_h=3.14*2):
-        subplot_kw= dict(projection='3d') if three else {}
-        alphabets = _cycle(_string.ascii_lowercase)
-        fig, axis = _plt.subplots(nrows=rows, ncols=cols,
-                                dpi=150, figsize=(figsize_w, figsize_h),
-                                subplot_kw=subplot_kw)
+                 figsize=None, dpi=150, space=None):
 
-        if not isinstance(axis, _np.ndarray):
-            axis = _np.array([[axis]])
-        else:
-            if rows==1 or cols==1:
-                axis = axis.reshape((rows, cols))
+        if figsize is None:
+            if rows <= cols:
+                figsize = (3.14*1.7*2, 3.14*2)
+            else:
+                figsize = (3.14*2, 3.14*1.7*2)
+
+        _rcParams.update(config)
+
+        alphabets = _cycle(_string.ascii_lowercase)
+
+        if isinstance(three, int):
+            three = tuple([three])
+        three = three or ()
+
+        fig = _plt.figure(dpi=dpi, figsize=figsize)
+
+        if three:
+            _plt.subplots_adjust(wspace=0.4)
+
+        if space is not None:
+            _plt.subplots_adjust(wspace=space[0] ,hspace=space[1])
+
+
+
+        axis = []
+        for j in range(1, rows*cols+1):
+            s = (rows, cols, j)
+            kwargs = dict()
+
+            if j in three:
+                kwargs['projection']='3d'
+
+            ax = fig.add_subplot(*s, **kwargs)
+            axis.append(ax)
+
+        axis = _np.array(axis)
+
+        if rows==1 or cols==1:
+            axis = axis.reshape((rows, cols))
 
         if number:
             for ax in _np.ravel(axis):

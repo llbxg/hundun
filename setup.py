@@ -18,7 +18,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, NAME, '__version__.py')) as f:
     exec(f.read(), (version := {}))
 
-with open('README.rst') as f:
+with open('README.md') as f:
     long_description = f.read()
 
 setup(
@@ -26,6 +26,7 @@ setup(
     version=version['__version__'],
     description='hundun is a python library for the exploration of chaos.',
     long_description=long_description,
+    long_description_content_type="text/markdown",
     url='http://github.com/llbxg/hundun',
     author='kosh',
     author_email='llllbxg@gmial.com',

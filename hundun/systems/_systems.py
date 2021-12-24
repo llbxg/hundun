@@ -78,6 +78,9 @@ class DynamicalSystems(_ABC):
         if notsave:
             self._u_seq, self._t_seq = [], []
 
+        if t0 is None:
+            self.t = 0
+
         self.t, self.u = self.internal_state
 
         return self.internal_state
