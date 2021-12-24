@@ -9,6 +9,8 @@ from ..systems._differential import Differential as _Differential
 from ..systems._difference import Difference as _Difference
 
 
+import numpy as _np
+
 def calc_les(system, **options):
 
     if issubclass(system, _Differential):
@@ -19,3 +21,5 @@ def calc_les(system, **options):
 
     if not issubclass(system, _DynamicalSystems):
         raise TypeError(f"{system} must be a DynamicalSystems")
+
+    return _np.zeros((3, 3)), (None, None, None)
