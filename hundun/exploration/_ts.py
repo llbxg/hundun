@@ -1,6 +1,9 @@
 import numpy as _np
 from scipy import signal as _signal
 
+from ..exploration._autocorrelation import (
+    autocovariance_function as _autocovariance_function,)
+from ..exploration._mutualinfo import calc_mutual_info as _calc_mutual_info
 from ..exploration._recurrenceplot import (
     calc_recurrence_plot as _calc_recurrence_plot,
     show_recurrence_plot as _show_recurrence_plot)
@@ -51,3 +54,29 @@ class TimeSeries(object):
 
     def show_recurrence_plot(self, *params, **kwargs):
         return _show_recurrence_plot(self.u_seq, *params, **kwargs)
+
+    def autocovariance_function(self, tau=100):
+        gamma_seq = [
+            _autocovariance_function(self.dim, self.u_seq, self.average,
+                                     t, self.N)
+            for t
+            in range(tau)
+        ]
+        return _np.array(gamma_seq)
+
+    def autocorrelation_function(self, tau=100):
+        gamma_seq = self.autocovariance_function(tau)
+        return gamma_seq/gamma_seq[0]
+
+    def calc_lag_w_acrf(self, threshold=0.05):
+        rho_seq = _np.abs(self.autocorrelation_function())
+        lags = []
+        for i in range(self.dim):
+            us = rho_seq[:, i]
+            min_idx = _signal.argrelmin(us, order=1)[0]
+            candidate = min_idx[us[min_idx]<=threshold]
+            if len(candidate):
+                lags.append(candidate[0])
+            else:
+                lags.append(None)
+        return tuple(lags)
