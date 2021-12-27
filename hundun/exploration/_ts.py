@@ -68,11 +68,39 @@ class TimeSeries(object):
         gamma_seq = self.autocovariance_function(tau)
         return gamma_seq/gamma_seq[0]
 
+    def mutual_info(self, tau=100):
+        miss = []
+        for i in range(self.dim):
+            us = self.u_seq[:, i]
+            mis = [
+                _calc_mutual_info(us[:-tau], us[tau:], self.N, bins=32)
+                for tau
+                in range(1, tau+1)]
+            miss.append(mis)
+        return _np.array(miss).T
+
     def calc_lag_w_acrf(self, threshold=0.05):
         rho_seq = _np.abs(self.autocorrelation_function())
         lags = []
         for i in range(self.dim):
             us = rho_seq[:, i]
+            min_idx = _signal.argrelmin(us, order=1)[0]
+            candidate = min_idx[us[min_idx]<=threshold]
+            if len(candidate):
+                lags.append(candidate[0])
+            else:
+                lags.append(None)
+        return tuple(lags)
+
+    def calc_lag_w_mi(self, **options):
+        mi = self.mutual_info(**options)
+        return self._get_bottom(mi)
+
+    def _get_bottom(self, seq, threshold=float('inf')):
+        seq = _np.abs(seq)
+        lags = []
+        for i in range(self.dim):
+            us = seq[:, i]
             min_idx = _signal.argrelmin(us, order=1)[0]
             candidate = min_idx[us[min_idx]<=threshold]
             if len(candidate):
