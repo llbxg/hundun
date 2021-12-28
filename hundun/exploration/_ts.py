@@ -7,7 +7,9 @@ from ..exploration._mutualinfo import calc_mutual_info as _calc_mutual_info
 from ..exploration._recurrenceplot import (
     calc_recurrence_plot as _calc_recurrence_plot,
     show_recurrence_plot as _show_recurrence_plot)
-
+from ..exploration._utils import (embedding_seq as _embedding_seq)
+from ..exploration._gp import (
+    calc_correlation_dimention_w_gp as _calc_correlation_dimention_w_gp)
 
 class TimeSeries(object):
 
@@ -48,6 +50,13 @@ class TimeSeries(object):
     @property
     def shape(self):
         return self.u_seq.shape
+
+    def e_seq(self, T, D):
+        return _embedding_seq(self.u_seq, T, D)
+
+    def calc_D2_w_gp(self, T, D):
+        D2 , _, _ = _calc_correlation_dimention_w_gp(self.e_seq(T, D))
+        return D2
 
     def calc_recurrence_plot(self, *params, **kwargs):
         return _calc_recurrence_plot(self.u_seq, *params, **kwargs)
