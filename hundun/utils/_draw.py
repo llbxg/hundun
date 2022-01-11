@@ -70,7 +70,9 @@ class Drawing(object):
 
         alphabets = _cycle(_string.ascii_lowercase)
 
-        if isinstance(three, int):
+        if three is True:
+            three = tuple(range(1, rows*cols+1))
+        elif isinstance(three, int):
             three = tuple([three])
         three = three or ()
 
