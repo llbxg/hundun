@@ -100,6 +100,8 @@ d.show()
 Currently, time series analysis methods are being added!
 
 
+# Documentation
+
 ## Installation
 
 hundun can be installed via pip from PyPI.
@@ -114,8 +116,44 @@ To use the latest code (unstable), checkout the dev branch and run above command
 pip install .
 ```
 
+## exploration
+### Introduction
+The following example uses a 1-dim time series (x) obtained from the Lorenz equation. Equation were numerically integrated by Runge-Kutta method with a time with h=0.01 for 5000 time steps.
+
+![fig:embedding](docs/img/sample_lorenz_data.png)
+
+```python
+u_seq = np.load('sample/data/lorenz_x.npy')
+```
+
+
+### Embedding (埋め込み)
+Generate a time series using the embedding dimension `D` and the time lag `L`.   
+
+```Python
+from hundun.exploration import embedding
+```
+
+Generate a time series by using `embedding(u_seq, T, D)` and plot the result.
+
+```python
+e_seq = embedding(u_seq, 10, 2)
+
+d = Drawing()
+d[0,0].plot(e_seq[:, 0], e_seq[:, 1])
+d[0,0].set_axis_label('x(t)', 'x(t+T)')
+d.show()
+```
+
+![fig:embedding](docs/img/sample_lorenz_embedding_2.png)
+
+The result of calculation with D=3 and shifting T is shown below.
+
+![fig:embedding](docs/img/sample_embedding.png)
+
+
 ## Dependencies
 
-[[ Numpy ]](https://numpy.org)
-[[ Scipy ]](https://scipy.org)
-[[ Matplotlib ]](https://matplotlib.org)
+[{ Numpy }](https://numpy.org)
+[{ Scipy }](https://scipy.org)
+[{ Matplotlib }](https://matplotlib.org)
