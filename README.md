@@ -102,6 +102,21 @@ Currently, time series analysis methods are being added!
 
 # Documentation
 
+- [Installation](#Installation)   
+- [Exploration](#Exploration)   
+    - [Embedding](#Embedding-(埋め込み))   
+- [Equations](#Equations)   
+    - [Lorenz equation](#Lorenz-equation)   
+    - [Henon map](#Henon-map)   
+    - [Logistic map](#Logistic-map)   
+- [Dynamical systems](#Dynamical-Systems)   
+    - [Difference / Differential](#Difference-/-Differential)   
+- [Lyapunov exponents](#Lyapunov-exponents)   
+- [Dependencies](#Dependencies)
+- [Reference](#Reference)
+
+
+
 ## Installation
 
 hundun can be installed via pip from PyPI.
@@ -116,7 +131,7 @@ To use the latest code (unstable), checkout the dev branch and run above command
 pip install .
 ```
 
-## exploration
+## Exploration
 ### Introduction
 The following example uses a 1-dim time series (x) obtained from the Lorenz equation. Equation were numerically integrated by Runge-Kutta method with a time with h=0.01 for 5000 time steps.
 
@@ -151,6 +166,50 @@ The result of calculation with D=3 and shifting T is shown below.
 
 ![fig:embedding](docs/img/sample_embedding.png)
 
+### Estimate generalized dimension
+
+#### Grassberger-Procaccia Algorithm
+[[Grassberger_1983]](#Measuring-the-strangeness-of-strange-attractors) [[Grassberger_1983_2]](#Characterization-of-Strange-Attractors)   
+
+The correlation dimension is obtained by calculating the correlation integral C(r).   
+
+As an example, the result when T = 1.
+
+```python
+import numpy as np
+
+from hundun.utils import Drawing
+from hundun import embedding
+from hundun.exploration import calc_D_w_gp
+
+u_seq = np.load('lorenz_x.npy')
+
+d= Drawing(1, 2)
+
+D_min, D_max = 1, 10
+D2s = []
+for i in range(D_min, D_max+1):
+    e_seq = embedding(u_seq, 1, i)
+    D2, rs, crs = calc_D_w_gp(e_seq)
+    d[0,0].plot(np.log(rs), np.log(crs), label=f'{i}: {D2:.3f}')
+
+    D2s.append(D2)
+
+d[0,0].legend()
+d[0,0].set_axis_label('\log ~r', '\log ~C(r)')
+
+d[0,1].plot(range(D_min, D_max+1), D2s)
+d[0,1].plot([1, D_max], [1, 4],
+            color='black', linewidth=0.5, linestyle='dashed')
+d[0,1].set_ylim(0, 5)
+# d[0,1].set_aspect('equal')
+d[0,1].set_axis_label('Embedding ~dimension', 'Correlation ~dimension')
+
+d.show()
+```
+
+![fig:gp](docs/img/sample_calc_D_gp.png)
+
 ## Equations
 Some equations have already been defined.   
 
@@ -172,7 +231,10 @@ By default, `s=10, r=28, b=8/3` is set.
 This class has a dimensionless time t and a variable u. For Lorenz, u = (x, y, z).   
 
 #### on_attractor
-@classmethod   
+```python
+@classmethod
+def on_attractor(cls, t0=None, u0=None, h=0.01, *, T_0=5000, **params):
+```
 
 Calculate from a random initial position [0,1) and place the trajectory on the attractor.    
 By default, 5000 steps are calculated.   
@@ -189,6 +251,10 @@ The calculation process is as shown in the figure from the blue point to the ora
 
 
 #### solve_n_times
+```python
+def solve_n_times(self, n):
+```
+
 Calculate n times.   
 After the calculation, you can get the time and orbit by using `.t_seq` and `.u_seq`.
 
@@ -198,7 +264,6 @@ l.solve_n_times(5000)
 
 u_seq, t_seq = l.u_seq, l.t_seq
 ```
-
 
 ### Henon map
 [[Hénon_1976]](#A-two-dimensional-mapping-with-a-strange-attractor)   
@@ -231,14 +296,180 @@ By default, `a=4.0` is set.
 ![fig:logistic](docs/img/sample_logistic.png)   
 
 
-## systems
+## Dynamical Systems
 You can create maps and equations by using `Difference` and `Differential` and analyze the created instance.
 
 ### Difference / Differential
+```python
+from hundun import Difference, Differential
+```
+
 There is no big difference between the two. 
 The difference in `.solve` is whether to map or use runge-kutta.
 
-The important thing is to define parameter() and equation() as methods.
+The important thing is to define `parameter()` and `equation()` as methods.
+
+#### parameter()
+You must always define dimention(`self.dim`). (It is used to set the initial value and calculate the Lyapunov exponents.)   
+(1) If set `self.xxx`, can be used in `equation()`.
+
+#### equation()
+Two arguments, time(`t`) and variable(`u`), are required.   
+
+(2) Since `u` is `self.dim`-dimensional variable, its value can be got using the unpack syntax.   
+(3) The return value does not have to be a vector.
+
+
+#### example
+Here is an example of defining Lorenz. This time, set the parameter `self.s` in `parameter()`. 
+Refer to [[Lorenz equation]](#Lorenz-equation) for how to use it.
+
+```python
+class Lorenz(Differential):
+
+    def parameter(self, s=10):
+        self.dim = 3
+        self.s = s  #(1)
+
+    def equation(self, t, u):
+        r, b = 28, 8/3
+        s = self.s  #(1)
+
+        x, y, z = u  #(2)
+
+        x_dot = s*(y - x)
+        y_dot = r*x - y - x*z
+        z_dot = x*y - b*z
+
+        return x_dot, y_dot, z_dot
+        # (3) OK:
+        #      np.array([x_dot, y_dot, z_dot])
+        #      [x_dot, y_dot, z_dot]
+```
+
+## Lyapunov exponents
+Calculate the Lyapunov exponents (Lyapunov spectrum).
+
+```python
+from hundun import calc_les
+```
+
+### calc_les
+```python
+def calc_les(system, **options):
+```
+
+Specify a `Difference` or `Differential` object for system. 
+
+#### Difference
+Jacobin is always required because it is calculated on the QR base. 
+(In the case of 1-dim, a different method is used instead of QR-based to speed up the calculation.)
+
+As an example, search for parameters of Henon. It is possible to estimate the range in which the LEs is positive.
+
+```python
+from itertools import product
+
+from hundun.equations.henon import Henon
+from matplotlib.colors import Normalize
+import numpy as np
+
+from hundun.lyapunov import calc_les
+from hundun.utils import Drawing
+
+
+N_a, N_b = 50, 50
+a_list = np.linspace(0, 2.1, N_a)
+b_list = np.linspace(0, 1.1, N_b)
+
+les_list = []
+for a, b in product(a_list, b_list):
+    for _ in range(10):
+        try:
+            _, les = calc_les(Henon, b=b, a=a)
+            les_list.append(les)
+            break
+        except ValueError:
+            pass
+    else:
+        les_list.append((None, None))
+les = np.array(les_list).reshape(N_b, N_a, 2)
+
+d=Drawing(1, 2)
+for i in range(2):
+    le = les[:,:,i]
+    sf = d[0,i].contourf(*np.meshgrid(a_list, b_list), le, cmap='jet',
+                         norm=Normalize(vmin=-2, vmax=1))
+    cb = d.fig.colorbar(sf, ax=d[0,i], orientation='horizontal')
+    d[0,i].set_axis_label('a', 'b')
+    d[0,i].set_title(f'$\lambda_{i+1}$')
+d.show()
+```
+![fig:henon_les](docs/img/sample_henon_les.png)
+
+As an example, calculate the LE for parameter A of Logistic map.
+
+```python
+import math
+
+from hundun import calc_les
+from hundun.equations import Logistic
+from hundun.utils import Drawing
+
+
+L, dh = 400+1, 0.01
+
+d = Drawing()
+
+le_list = []
+for i in range(L):
+    a = i*dh
+    _, le = calc_les(Logistic, N=500, a=a)
+    le_list.append(le)
+d[0,0].plot([dh*i for i in range(L)], le_list)
+
+for y in [0, math.log(2)]:
+    d[0,0].axhline(y, color="black", linewidth=0.5)
+
+d[0,0].set_axis_label('a', '\lambda')
+d[0,0].set_ylim(-5, 1)
+d.show()
+```
+
+![fig:lm_le](docs/img/sample_logistic_le_bif.png)
+
+
+#### Differential
+
+As an example, compare with and without Jacobian Matrix(`jacobian`). 
+
+```python
+from hundun import calc_les
+from hundun.equations import Lorenz
+from hundun.utils import Drawing
+
+
+class Lorenz_No_Jacobian(Lorenz):
+    def jacobian(self):
+        return None
+
+
+u0 = Lorenz.on_attractor().u
+
+d = Drawing(1, 2)
+for j, system in enumerate([Lorenz, Lorenz_No_Jacobian]):
+    les_seq, les = calc_les(system, u0=u0)
+    for i, le in enumerate(les):
+        p, = d[0, j].plot(les_seq[:, i],
+                          label=fr'$\lambda_{i+1}=$ {le:>+8.3f}')
+
+    d[0,j].legend(loc='center right')
+    d[0,j].set_axis_label('step', '\lambda')
+    d[0,j].set_ylim(-16, 3)
+d.show()
+```
+![fig:henon](docs/img/sample_les_jaco_or_no.png)
+
 
 ## Dependencies
 
@@ -260,3 +491,11 @@ DOI: 10.1007/BF01608556
 ### Simple mathematical models with very complicated dynamics
 Robert M. May   
 DOI: 10.1038/261459a0
+
+### Measuring the strangeness of strange attractors
+Peter Grassberger and Itamar Procaccia   
+DOI: 10.1016/0167-2789(83)90298-1
+
+###  Characterization of Strange Attractors
+Peter Grassberger and Itamar Procaccia   
+DOI: 10.1103/PhysRevLett.50.346
