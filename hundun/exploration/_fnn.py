@@ -3,17 +3,17 @@
 import numpy as _np
 from scipy.spatial.distance import cdist as _cdist
 
-from ._utils import embedding_seq_1dim as _embedding_seq_1dim
+from ._utils import embedding as _embedding
 
 
 def _dist(seq):
     return _cdist(seq, seq, metric='euclidean')
 
 
-def calc_fnn(u_seq, threshold_R=10, threshold_A=2, T=50, D_max=10):
+def fnn(u_seq, threshold_R=10, threshold_A=2, T=50, D_max=10):
     R_A = _np.std(u_seq)
 
-    e_seq_list = [_embedding_seq_1dim(u_seq, T, j) for j in range(1, D_max+2)]
+    e_seq_list = [_embedding(u_seq, T, j) for j in range(1, D_max+2)]
 
     percentage_list = []
     for e_seq1, e_seq2 in zip(e_seq_list, e_seq_list[1:]):
