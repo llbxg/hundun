@@ -21,9 +21,14 @@ def embedding_seq_1dim(u_seq, T, D):
 
 
 def embedding(u_seq, T, D):
-    _, dim = u_seq.shape
+    dim, length = u_seq.ndim, len(u_seq)
+
+    if len(u_seq.shape)==1:
+        u_seq = u_seq.reshape(length, dim)
+
     idx = _np.arange(0,D,1)*T
-    e_seq = _np.array([u_seq[idx+i,:] for i in range(len(u_seq)-(D-1)*T)])
+    e_seq = _np.array([u_seq[idx+i,:] for i in range(length-(D-1)*T)])
+
     if dim == 1:
         e_seq = e_seq.reshape(len(e_seq), D)
     return e_seq
