@@ -105,6 +105,9 @@ Currently, time series analysis methods are being added!
 - [Installation](#Installation)   
 - [Exploration](#Exploration)   
     - [Embedding](#Embedding-(埋め込み))   
+    - [Estimate the time lag](#Estimate-the-time-lag)
+    - [Estimate the generalized dimension](#Estimate-the-generalized-dimension)
+    - [Estimate the acceptable minimum embedding dimension](#Estimate-the-acceptable-minimum-embedding-dimension)
 - [Equations](#Equations)   
     - [Lorenz equation](#Lorenz-equation)   
     - [Henon map](#Henon-map)   
@@ -166,49 +169,158 @@ The result of calculation with D=3 and shifting T is shown below.
 
 ![fig:embedding](docs/img/sample_embedding.png)
 
-### Estimate generalized dimension
+### Estimate the time lag
+#### Autocorrelation Function
+#### Mutual Information
+
+### Estimate the generalized dimension
 
 #### Grassberger-Procaccia Algorithm
 [[Grassberger_1983]](#Measuring-the-strangeness-of-strange-attractors) [[Grassberger_1983_2]](#Characterization-of-Strange-Attractors)   
 
-The correlation dimension is obtained by calculating the correlation integral C(r).   
+```python
+def calc_correlation_dimention_w_gp(
+    e_seq, base=8, h_r=0.05, loop=200, batch_ave=10, normalize=True):
+```
 
-As an example, the result when T = 1.
+The correlation dimension(D2) is obtained by calculating the correlation integral C(r).   
+
+As an example, The result when fixed at T=1 is shown below.
 
 ```python
 import numpy as np
 
 from hundun.utils import Drawing
 from hundun import embedding
-from hundun.exploration import calc_D_w_gp
+from hundun.exploration import calc_correlation_dimention_w_gp
 
 u_seq = np.load('lorenz_x.npy')
 
 d= Drawing(1, 2)
 
-D_min, D_max = 1, 10
+D_min, D_max = 1, 9
 D2s = []
 for i in range(D_min, D_max+1):
     e_seq = embedding(u_seq, 1, i)
-    D2, rs, crs = calc_D_w_gp(e_seq)
-    d[0,0].plot(np.log(rs), np.log(crs), label=f'{i}: {D2:.3f}')
-
+    D2, rs, crs = calc_correlation_dimention_w_gp(e_seq)
+    d[0,0].plot(np.log(rs), np.log(crs), label=f'${i}$: {D2:.3f}')
     D2s.append(D2)
 
 d[0,0].legend()
 d[0,0].set_axis_label('\log ~r', '\log ~C(r)')
 
 d[0,1].plot(range(D_min, D_max+1), D2s)
-d[0,1].plot([1, D_max], [1, 4],
+d[0,1].plot([1, D_max], [1, D_max],
             color='black', linewidth=0.5, linestyle='dashed')
-d[0,1].set_ylim(0, 5)
-# d[0,1].set_aspect('equal')
+d[0,1].set_aspect('equal')
 d[0,1].set_axis_label('Embedding ~dimension', 'Correlation ~dimension')
 
 d.show()
 ```
 
 ![fig:gp](docs/img/sample_calc_D_gp.png)
+
+In the GP-method, D2 is calculated directly from the attractor.
+It cannot be evaluated accurately from 1-dim data.
+When calculating with 3-dim data, it can be calculated with some accuracy.
+
+```python
+l = Lorenz.on_attractor()
+l.solve_n_times(5000)
+u_seq = l.u_seq
+```
+![fig:gp_3dim](docs/img/sample_calc_D_gp_3dim.png)
+
+### Estimate the acceptable minimum embedding dimension
+
+#### False Nearest Neighbors - Algorithm
+
+[[Kennel_1992]](#Determining-embedding-dimension-for-phase-space-reconstruction-using-a-geometrical-construction)
+
+```python
+def fnn(u_seq, threshold_R=10, threshold_A=2, T=50, D_max=10):
+```
+
+```python
+import numpy as np
+from hundun.utils import Drawing
+from hundun.exploration import fnn
+
+u_seq = np.load('lorenz_x.npy')
+
+percentage_list = fnn(u_seq)
+
+d = Drawing()
+d[0,0].plot(range(1, len(percentage_list)+1), percentage_list*100,
+            marker='.', markersize=10)
+d[0,0].axhline(1, color="black", linewidth=0.5)
+d[0,0].set_axis_label('Dimension', 'False~NN~Percentage')
+d.show()
+```
+
+![fig:fnn](docs/img/sample_fnn.png)
+
+#### Averaged False Neighbors - Algorithm
+
+[[Cao_1997]](#Practical-method-for-determining-the-minimum-embedding-dimension-of-a-scalar-time-series)
+
+```python
+def afn(u_seq, T=1, D_max=10):
+```
+
+```python
+from itertools import cycle
+
+from hundun.utils import Drawing
+from hundun.exploration import afn
+import matplotlib as mpl
+import numpy as np
+
+color = cycle(mpl.rcParams['axes.prop_cycle'])
+
+
+u_seq = np.load('lorenz_x.npy')
+line, marker = {'E1':'solid', 'E2':'dashed'}, {'E1':'o', 'E2':'s'}
+
+d = Drawing()
+for T in [1, 5, 10]:
+    Es = afn(u_seq, T=T)
+    c = next(color)['color']
+    for label, E in zip(['E1', 'E2'], Es):
+        d[0,0].plot(range(1, len(E)+1), E,
+                    marker=marker[label], markersize=5,
+                    label=f'{label}-{T}', linestyle=line[label], color=c)
+
+d[0,0].axhline(1, color="black", linewidth=0.5)
+
+d[0,0].set_axis_label('Dimension', 'E1~&~E2')
+d[0,0].legend(loc='lower right')
+d.show()
+```
+
+![fig:afn](docs/img/sample_afn.png)
+
+#### Wayland Test
+[[Wayland_1993]](#Recognizing-determinism-in-a-time-series)
+
+```python
+from hundun.exploration import wayland
+from hundun.utils import Drawing
+import numpy as np
+
+u_seq = np.load('lorenz_x.npy')
+
+median_e_trans_ave = wayland(u_seq)
+
+d = Drawing()
+d[0,0].plot(range(1, len(median_e_trans_ave)+1), median_e_trans_ave)
+d[0,0].scatter(median_e_trans_ave.argmin()+1, median_e_trans_ave.min())
+d[0,0].set_axis_label('Dimension', 'median(E_{trans})')
+d[0,0].set_yscale('log')
+d.show()
+```
+
+![fig:wayland](docs/img/sample_wayland.png)
 
 ## Equations
 Some equations have already been defined.   
@@ -499,3 +611,15 @@ DOI: 10.1016/0167-2789(83)90298-1
 ###  Characterization of Strange Attractors
 Peter Grassberger and Itamar Procaccia   
 DOI: 10.1103/PhysRevLett.50.346
+
+### Determining embedding dimension for phase-space reconstruction using a geometrical construction
+(1992) Matthew B. Kennel, Reggie Brown, and Henry D. I. Abarbanel   
+DOI: 10.1103/PhysRevA.45.3403   
+
+### Practical method for determining the minimum embedding dimension of a scalar time series
+(1997) Liangyue Cao   
+DOI: 10.1016/S0167-2789(97)00118-8   
+
+### Recognizing determinism in a time series
+(1993) Wayland, Richard and Bromley, David and Pickett, Douglas and Passamante, Anthony   
+DOI: 10.1103/PhysRevLett.70.580
