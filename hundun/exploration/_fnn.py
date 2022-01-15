@@ -35,4 +35,4 @@ def fnn(u_seq, threshold_R=10, threshold_A=2, T=50, D_max=10):
 
         percentage_list.append(percentage*(1/len(e_seq2)))
 
-    return percentage_list
+    return _np.array(percentage_list)
