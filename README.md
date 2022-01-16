@@ -94,7 +94,7 @@ d[0,1].set_axis_label('step', r'\lambda')
 d.show()
 ```
 
-![fig:lorenz](docs/img/sample_lorenz_les.png)
+![fig:lorenz](https://github.com/llbxg/hundun/blob/main/docs/img/sample_lorenz_les.png?raw=true)
 
 
 Currently, time series analysis methods are being added!
@@ -138,7 +138,7 @@ pip install .
 ### Introduction
 The following example uses a 1-dim time series (x) obtained from the Lorenz equation. Equation were numerically integrated by Runge-Kutta method with a time with h=0.01 for 5000 time steps.
 
-![fig:embedding](docs/img/sample_lorenz_data.png)
+![fig:embedding](https://github.com/llbxg/hundun/blob/main/docs/img/sample_lorenz_data.png?raw=true)
 
 ```python
 u_seq = np.load('sample/data/lorenz_x.npy')
@@ -163,11 +163,11 @@ d[0,0].set_axis_label('x(t)', 'x(t+T)')
 d.show()
 ```
 
-![fig:embedding](docs/img/sample_lorenz_embedding_2.png)
+![fig:embedding](https://github.com/llbxg/hundun/blob/main/docs/img/sample_lorenz_embedding_2.png?raw=true)
 
 The result of calculation with D=3 and shifting T is shown below.
 
-![fig:embedding](docs/img/sample_embedding.png)
+![fig:embedding](https://github.com/llbxg/hundun/blob/main/docs/img/sample_embedding.png?raw=true)
 
 ### Estimate the time lag
 #### Mutual Information
@@ -195,7 +195,7 @@ d[0,0].set_axis_label('Time~lag', 'Mutual~Information~[bit]')
 d.show()
 ```
 
-![fig:mi](docs/img/sample_mi.png)
+![fig:mi](https://github.com/llbxg/hundun/blob/main/docs/img/sample_mi.png?raw=true)
 
 ### Estimate the generalized dimension
 
@@ -242,7 +242,7 @@ d[0,1].set_axis_label('Embedding ~dimension', 'Correlation ~dimension')
 d.show()
 ```
 
-![fig:gp](docs/img/sample_calc_D_gp.png)
+![fig:gp](https://github.com/llbxg/hundun/blob/main/docs/img/sample_calc_D_gp.png?raw=true)
 
 In the GP-method, D2 is calculated directly from the attractor.
 It cannot be evaluated accurately from 1-dim data.
@@ -253,7 +253,7 @@ l = Lorenz.on_attractor()
 l.solve_n_times(5000)
 u_seq = l.u_seq
 ```
-![fig:gp_3dim](docs/img/sample_calc_D_gp_3dim.png)
+![fig:gp_3dim](https://github.com/llbxg/hundun/blob/main/docs/img/sample_calc_D_gp_3dim.png?raw=true)
 
 ### Estimate the acceptable minimum embedding dimension
 
@@ -282,7 +282,7 @@ d[0,0].set_axis_label('Dimension', 'False~NN~Percentage')
 d.show()
 ```
 
-![fig:fnn](docs/img/sample_fnn.png)
+![fig:fnn](https://github.com/llbxg/hundun/blob/main/docs/img/sample_fnn.png?raw=true)
 
 #### Averaged False Neighbors - Algorithm
 
@@ -322,7 +322,7 @@ d[0,0].legend(loc='lower right')
 d.show()
 ```
 
-![fig:afn](docs/img/sample_afn.png)
+![fig:afn](https://github.com/llbxg/hundun/blob/main/docs/img/sample_afn.png?raw=true)
 
 #### Wayland Test
 [[Wayland_1993]](#Recognizing-determinism-in-a-time-series)
@@ -344,7 +344,7 @@ d[0,0].set_yscale('log')
 d.show()
 ```
 
-![fig:wayland](docs/img/sample_wayland.png)
+![fig:wayland](https://github.com/llbxg/hundun/blob/main/docs/img/sample_wayland.png?raw=true)
 
 ## Equations
 Some equations have already been defined.   
@@ -383,7 +383,7 @@ attractor = Lorenz.on_attractor()
 
 The calculation process is as shown in the figure from the blue point to the orange point.
 
-![fig:on_attractor](docs/img/set_on_attractor.png)
+![fig:on_attractor](https://github.com/llbxg/hundun/blob/main/docs/img/set_on_attractor.png?raw=true)
 
 
 #### solve_n_times
@@ -419,7 +419,7 @@ while True:
         break
 ```
 
-![fig:henon](docs/img/sample_henon.png)
+![fig:henon](https://github.com/llbxg/hundun/blob/main/docs/img/sample_henon.png?raw=true)
 
 ### Logistic map
 By default, `a=4.0` is set.
@@ -429,7 +429,7 @@ By default, `a=4.0` is set.
 
 ![x_{t+1}=ax_t(1-x_t)](https://render.githubusercontent.com/render/math?math=%5CLarge+%5Cdisplaystyle+x_%7Bt%2B1%7D%3Dax_t%281-x_t%29)   
 
-![fig:logistic](docs/img/sample_logistic.png)   
+![fig:logistic](https://github.com/llbxg/hundun/blob/main/docs/img/sample_logistic.png?raw=true)   
 
 
 ## Dynamical Systems
@@ -541,7 +541,7 @@ for i in range(2):
     d[0,i].set_title(f'$\lambda_{i+1}$')
 d.show()
 ```
-![fig:henon_les](docs/img/sample_henon_les.png)
+![fig:henon_les](https://github.com/llbxg/hundun/blob/main/docs/img/sample_henon_les.png?raw=true)
 
 As an example, calculate the LE for parameter A of Logistic map.
 
@@ -572,7 +572,7 @@ d[0,0].set_ylim(-5, 1)
 d.show()
 ```
 
-![fig:lm_le](docs/img/sample_logistic_le_bif.png)
+![fig:lm_le](https://github.com/llbxg/hundun/blob/main/docs/img/sample_logistic_le_bif.png?raw=true)
 
 
 #### Differential
@@ -604,7 +604,7 @@ for j, system in enumerate([Lorenz, Lorenz_No_Jacobian]):
     d[0,j].set_ylim(-16, 3)
 d.show()
 ```
-![fig:henon](docs/img/sample_les_jaco_or_no.png)
+![fig:henon](https://github.com/llbxg/hundun/blob/main/docs/img/sample_les_jaco_or_no.png?raw=true)
 
 
 ## Dependencies
