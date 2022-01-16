@@ -510,7 +510,7 @@ from hundun.equations.henon import Henon
 from matplotlib.colors import Normalize
 import numpy as np
 
-from hundun.lyapunov import calc_les
+from hundun import calc_les
 from hundun.utils import Drawing
 
 
