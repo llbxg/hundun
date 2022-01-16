@@ -1,4 +1,5 @@
 import numpy as _np
+from scipy import signal as _signal
 
 
 def reshape(u_seq):
@@ -31,3 +32,18 @@ def embedding(u_seq, T, D):
     if u_seq.shape[1] == 1:
         e_seq = e_seq.reshape(len(e_seq), D)
     return e_seq
+
+
+def get_bottom(seq, threshold=float('inf')):
+    _, dim = seq.shape
+
+    lags = []
+    for i in range(dim):
+        us = seq[:, i]
+        min_idx = _signal.argrelmin(us, order=1)[0]
+        candidate = min_idx[us[min_idx]<=threshold]
+        if len(candidate):
+            lags.append(candidate[0])
+        else:
+            lags.append(None)
+    return tuple(lags)
