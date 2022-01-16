@@ -70,7 +70,9 @@ class Drawing(object):
 
         alphabets = _cycle(_string.ascii_lowercase)
 
-        if isinstance(three, int):
+        if three is True:
+            three = tuple(range(1, rows*cols+1))
+        elif isinstance(three, int):
             three = tuple([three])
         three = three or ()
 
@@ -95,10 +97,7 @@ class Drawing(object):
             ax = fig.add_subplot(*s, **kwargs)
             axis.append(ax)
 
-        axis = _np.array(axis)
-
-        if rows==1 or cols==1:
-            axis = axis.reshape((rows, cols))
+        axis = _np.array(axis).reshape((rows, cols))
 
         if number:
             for ax in _np.ravel(axis):

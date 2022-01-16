@@ -107,7 +107,7 @@ class DynamicalSystems(_ABC):
 
         p = ', '.join(f'{key}={_np.round(v[key], 3)}'
                       for key in v.keys()
-                      if ('_' not in key) and (key != 'u'))
+                      if ('_' not in key) and (key not in ['t', 'u']))
 
         name = self.__class__.__name__
         return f'{name}({p})'
