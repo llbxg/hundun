@@ -2,6 +2,8 @@
 
 import numpy as _np
 
+from ._utils import reshape as _reshape
+
 
 def _log2(a):
     return _np.log2(a+1e-15)
@@ -26,3 +28,18 @@ def calc_joint_entropy(x, y, N, **options):
     ps = (hist/N).flatten()
     H_xy = -_np.sum(ps*_log2(ps))
     return H_xy
+
+
+def mutual_info(u_seq, tau):
+    u_seq = _reshape(u_seq)
+
+    N, dim = u_seq.shape
+
+    miss = []
+    for i in range(dim):
+        us = u_seq[:, i]
+        mis = [calc_mutual_info(us[:-t], us[t:], N, bins=32)
+               for t in range(1, tau+1)]
+        miss.append(mis)
+
+    return _np.array(miss).T
