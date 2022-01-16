@@ -170,8 +170,32 @@ The result of calculation with D=3 and shifting T is shown below.
 ![fig:embedding](docs/img/sample_embedding.png)
 
 ### Estimate the time lag
-#### Autocorrelation Function
 #### Mutual Information
+```python
+def mutual_info(u_seq, tau):
+```
+Create a histogram from time series data and calculate mutual information.
+
+```python
+from hundun.exploration import mutual_info, get_bottom
+from hundun.utils import Drawing
+import numpy as np
+
+
+u_seq = np.load('lorenz_x.npy')
+
+mi_seq = mutual_info(u_seq, 300)
+bottom = get_bottom(mi_seq)
+
+d = Drawing()
+for i, idx in enumerate(bottom):
+    d[0,0].plot(mi_seq[:, i])
+    d[0,0].scatter(idx, mi_seq[idx, i])
+d[0,0].set_axis_label('Time~lag', 'Mutual~Information~[bit]')
+d.show()
+```
+
+![fig:mi](docs/img/sample_mi.png)
 
 ### Estimate the generalized dimension
 
