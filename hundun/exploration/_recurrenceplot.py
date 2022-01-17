@@ -26,10 +26,12 @@ def calc_recurrence_plot(u_seq, rule=simple_threshold, *params, **kwargs):
     return rp+rp.T
 
 
-def show_recurrence_plot(u_seq, rule=simple_threshold, *params, **kwargs):
+def show_recurrence_plot(u_seq, rule=simple_threshold, cmap=False, *params, **kwargs):
     rp = calc_recurrence_plot(u_seq, rule, *params, **kwargs)
 
     d = _Drawing()
-    d[0,0].imshow(rp, origin='lower')
+    im = d[0,0].imshow(rp, origin='lower')
+    if cmap:
+        d.fig.colorbar(im)
     d.show()
     d.close()
