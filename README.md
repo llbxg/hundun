@@ -108,6 +108,7 @@ Currently, time series analysis methods are being added!
     - [Estimate the time lag](#Estimate-the-time-lag)   
     - [Estimate the generalized dimension](#Estimate-the-generalized-dimension)   
     - [Estimate the acceptable minimum embedding dimension](#Estimate-the-acceptable-minimum-embedding-dimension)   
+    - [Visualization](#Visualization)   
 - [Equations](#Equations)   
     - [Lorenz equation](#Lorenz-equation)   
     - [Henon map](#Henon-map)   
@@ -171,6 +172,44 @@ The result of calculation with D=3 and shifting T is shown below.
 ![fig:embedding](https://github.com/llbxg/hundun/blob/main/docs/img/sample_embedding.png?raw=true)
 
 ### Estimate the time lag
+
+#### Autocorrelation Function
+```python
+def acf(u_seq, tau):
+```
+Calculate the autocorrelation function from the time series data. 
+Finds a point where the autocorrelation function can be considered 0.
+
+In the example below, the time lag is determined based on Bartlett's formula.
+Other conditions include the first local minimums and 1/e or less.
+
+```python
+from hundun.exploration import acf, get_minidx_below_seq, bartlett
+from hundun.utils import Drawing
+import numpy as np
+
+
+u_seq = np.load('lorenz_x.npy')
+
+rho_seq = acf(u_seq, 400)
+var_seq = bartlett(rho_seq)
+idx_list = get_minidx_below_seq(rho_seq, var_seq)
+
+
+d = Drawing()
+for i, idx in enumerate(idx_list):
+    d[0,0].plot(rho_seq[:, i], label='acf')
+    d[0,0].plot(var_seq[:, i], label='standard error')
+    d[0,0].scatter(idx, rho_seq[idx, i], zorder=10, marker='o')
+d[0,0].legend()
+d[0,0].axhline(0, color="black", linewidth=0.5, linestyle='dashed')
+d[0,0].set_axis_label('Time~lag', 'Correlation~coefficient')
+d.show()
+```
+
+![fig:mi](docs/img/sample_acf.png)
+
+
 #### Mutual Information
 ```python
 def mutual_info(u_seq, tau):
@@ -255,6 +294,10 @@ l.solve_n_times(5000)
 u_seq = l.u_seq
 ```
 ![fig:gp_3dim](https://github.com/llbxg/hundun/blob/main/docs/img/sample_calc_D_gp_3dim.png?raw=true)
+
+#### Lyapunov dimension
+Calculate using `calc_lyapunov_dimension`.   
+See here -> [[Lyapunov dimension]](#Lyapunov-dimension)
 
 ### Estimate the acceptable minimum embedding dimension
 
@@ -346,6 +389,64 @@ d.show()
 ```
 
 ![fig:wayland](https://github.com/llbxg/hundun/blob/main/docs/img/sample_wayland.png?raw=true)
+
+### Visualization
+#### Recurrence Plot
+```python
+def calc_recurrence_plot(u_seq, rule=simple_threshold, *params, **kwargs):
+
+def show_recurrence_plot(u_seq, rule=simple_threshold, cmap=False, *params, **kwargs):
+```
+
+Create Recurrence Plot(RP) from time series data. 
+`calc_~` returns the result of RP as a matrix.
+`show_~` displays the result.
+
+
+```python
+from hundun.exploration import show_recurrence_plot
+import numpy as np
+
+u_seq = np.load('lorenz_x.npy')
+
+show_recurrence_plot(u_seq)
+```
+
+![fig:wayland](docs/img/sample_rp.png)
+
+The drawing rule uses the simplest one(`simple_threshold`). 
+
+```python
+def simple_threshold(ds, theta=0.5):
+    if (d_max:=_np.max(ds))!=0:
+        pv = (ds/d_max>theta)*255
+        return pv
+    return ds
+```
+
+This can be changed. The `rule` just takes a matrix and returns the matrix.
+
+
+```python
+from hundun.exploration import show_recurrence_plot
+import numpy as np
+
+
+def new_threshold(ds, func):
+    if (d_max:=np.max(ds))!=0:
+        pv = func(ds/d_max)*255
+        return np.uint8(pv)
+    return ds
+
+
+u_seq = np.load('lorenz_x.npy')
+
+show_recurrence_plot(u_seq, cmap=True, rule=new_threshold, func=np.log)
+```
+
+
+![fig:wayland](docs/img/sample_rp_2.png)
+
 
 ## Equations
 Some equations have already been defined.   
@@ -607,13 +708,34 @@ d.show()
 ```
 ![fig:henon](https://github.com/llbxg/hundun/blob/main/docs/img/sample_les_jaco_or_no.png?raw=true)
 
-## Roadmap
+### Lyapunov dimension
 
-* Lyapunov dimension
+```python
+def calc_lyapunov_dimension(les):
+```
+
+Calculate the Lyapunov dimension from LEs.
+
+```python
+from hundun import calc_les, calc_lyapunov_dimension
+from hundun.equations import Lorenz
+
+
+_, les = calc_les(Lorenz)
+D_L = calc_lyapunov_dimension(les)
+print(D_L)
+```
+```bash
+2.0673058796702217
+```
+
+
+## To Do
+
 * Synchronization
 * Time series
-* Recurrence plot
 * Baisn of attraction
+* sample
 
 ## Dependencies
 
