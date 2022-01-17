@@ -40,7 +40,7 @@ def calc_les_difference_dim_1(difference, N, n_average=100):
         le_list.append(_np.log(_np.abs(difference.j())))
     le_list = _np.array(
         [le/i for i, le in enumerate(_accumulate(le_list, _add), 1) ])
-    return le_list, _np.average(le_list[-n_average:])
+    return le_list, _np.array([_np.average(le_list[-n_average:])])
 
 def _make_model(difference, u0=None, **options):
     if u0 is None:
