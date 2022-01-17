@@ -18,7 +18,7 @@ def _autocorrelation_function(dim, u_seq, u_bar, tau, N):
     return gamma_seq/gamma_seq[0]
 
 
-def autocorrelation_function(u_seq, tau):
+def acf(u_seq, tau):
     u_seq = _reshape(u_seq)
 
     N, dim = u_seq.shape
