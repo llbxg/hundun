@@ -104,19 +104,20 @@ Currently, time series analysis methods are being added!
 
 - [Installation](#Installation)   
 - [Exploration](#Exploration)   
-    - [Embedding](#Embedding-(埋め込み))   
-    - [Estimate the time lag](#Estimate-the-time-lag)
-    - [Estimate the generalized dimension](#Estimate-the-generalized-dimension)
-    - [Estimate the acceptable minimum embedding dimension](#Estimate-the-acceptable-minimum-embedding-dimension)
+    - [Embedding](#Embedding-埋め込み)   
+    - [Estimate the time lag](#Estimate-the-time-lag)   
+    - [Estimate the generalized dimension](#Estimate-the-generalized-dimension)   
+    - [Estimate the acceptable minimum embedding dimension](#Estimate-the-acceptable-minimum-embedding-dimension)   
 - [Equations](#Equations)   
     - [Lorenz equation](#Lorenz-equation)   
     - [Henon map](#Henon-map)   
     - [Logistic map](#Logistic-map)   
 - [Dynamical systems](#Dynamical-Systems)   
-    - [Difference / Differential](#Difference-/-Differential)   
+    - [Difference / Differential](#Difference--Differential)   
 - [Lyapunov exponents](#Lyapunov-exponents)   
-- [Dependencies](#Dependencies)
-- [Reference](#Reference)
+- [Roadmap](#Roadmap)   
+- [Dependencies](#Dependencies)   
+- [Reference](#Reference)   
 
 
 
@@ -149,7 +150,7 @@ u_seq = np.load('sample/data/lorenz_x.npy')
 Generate a time series using the embedding dimension `D` and the time lag `L`.   
 
 ```Python
-from hundun.exploration import embedding
+from hundun import embedding
 ```
 
 Generate a time series by using `embedding(u_seq, T, D)` and plot the result.
@@ -606,6 +607,13 @@ d.show()
 ```
 ![fig:henon](https://github.com/llbxg/hundun/blob/main/docs/img/sample_les_jaco_or_no.png?raw=true)
 
+## Roadmap
+
+* Lyapunov dimension
+* Synchronization
+* Time series
+* Recurrence plot
+* Baisn of attraction
 
 ## Dependencies
 
