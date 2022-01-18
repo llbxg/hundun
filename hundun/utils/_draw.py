@@ -128,8 +128,8 @@ class Drawing(object):
 
     @classmethod
     def plot_a_and_b(cls, u_seq_a , u_seq_b, legend=True,
-                     color=None, name=None):
-        d = cls(1, 2)
+                     color=None, name=None, *args, **kwargs):
+        d = cls(1, 2, *args, **kwargs)
         ax_label = ['x', 'y', 'z']
         color = color or ['red', 'blue']
         name = name or ['a', 'b']
