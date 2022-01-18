@@ -125,3 +125,30 @@ class Drawing(object):
 
     def close(self):
         _plt.close()
+
+    @classmethod
+    def plot_a_and_b(cls, u_seq_a , u_seq_b, legend=True,
+                     color=None, name=None):
+        d = cls(1, 2)
+        ax_label = ['x', 'y', 'z']
+        color = color or ['red', 'blue']
+        name = name or ['a', 'b']
+        for i, (a, b) in enumerate(zip([0, 2], [1, 1])):
+            for j, u_seq in enumerate([u_seq_a, u_seq_b]):
+                c = color[j]
+                d[0,i].plot(u_seq[:, a], u_seq[:, b],
+                            color=c, label=f'${name[j]}$')
+
+                d[0,i].scatter(u_seq[0, a], u_seq[0, b],
+                               color=c, s=40, marker='o',
+                               zorder=10, edgecolor='white')
+                d[0,i].scatter(u_seq[-1, a], u_seq[-1, b],
+                               color=c, s=40, marker='s',
+                               zorder=10, edgecolor='white')
+
+            d[0,i].set_axis_label(ax_label[a], ax_label[b])
+
+        if legend:
+            d[0, 0].legend()
+
+        return d
