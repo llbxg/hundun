@@ -94,7 +94,7 @@ d[0,1].set_axis_label('step', r'\lambda')
 d.show()
 ```
 
-![fig:lorenz](docs/img/sample_lorenz_les.png)
+![fig:lorenz](https://github.com/llbxg/hundun/blob/main/docs/img/sample_lorenz_les.png?raw=true)
 
 
 Currently, time series analysis methods are being added!
@@ -104,19 +104,21 @@ Currently, time series analysis methods are being added!
 
 - [Installation](#Installation)   
 - [Exploration](#Exploration)   
-    - [Embedding](#Embedding-(埋め込み))   
-    - [Estimate the time lag](#Estimate-the-time-lag)
-    - [Estimate the generalized dimension](#Estimate-the-generalized-dimension)
-    - [Estimate the acceptable minimum embedding dimension](#Estimate-the-acceptable-minimum-embedding-dimension)
+    - [Embedding](#Embedding-埋め込み)   
+    - [Estimate the time lag](#Estimate-the-time-lag)   
+    - [Estimate the generalized dimension](#Estimate-the-generalized-dimension)   
+    - [Estimate the acceptable minimum embedding dimension](#Estimate-the-acceptable-minimum-embedding-dimension)   
+    - [Visualization](#Visualization)   
 - [Equations](#Equations)   
     - [Lorenz equation](#Lorenz-equation)   
     - [Henon map](#Henon-map)   
     - [Logistic map](#Logistic-map)   
 - [Dynamical systems](#Dynamical-Systems)   
-    - [Difference / Differential](#Difference-/-Differential)   
+    - [Difference / Differential](#Difference--Differential)   
 - [Lyapunov exponents](#Lyapunov-exponents)   
-- [Dependencies](#Dependencies)
-- [Reference](#Reference)
+- [Roadmap](#Roadmap)   
+- [Dependencies](#Dependencies)   
+- [Reference](#Reference)   
 
 
 
@@ -138,7 +140,7 @@ pip install .
 ### Introduction
 The following example uses a 1-dim time series (x) obtained from the Lorenz equation. Equation were numerically integrated by Runge-Kutta method with a time with h=0.01 for 5000 time steps.
 
-![fig:embedding](docs/img/sample_lorenz_data.png)
+![fig:embedding](https://github.com/llbxg/hundun/blob/main/docs/img/sample_lorenz_data.png?raw=true)
 
 ```python
 u_seq = np.load('sample/data/lorenz_x.npy')
@@ -149,7 +151,7 @@ u_seq = np.load('sample/data/lorenz_x.npy')
 Generate a time series using the embedding dimension `D` and the time lag `L`.   
 
 ```Python
-from hundun.exploration import embedding
+from hundun import embedding
 ```
 
 Generate a time series by using `embedding(u_seq, T, D)` and plot the result.
@@ -163,13 +165,51 @@ d[0,0].set_axis_label('x(t)', 'x(t+T)')
 d.show()
 ```
 
-![fig:embedding](docs/img/sample_lorenz_embedding_2.png)
+![fig:embedding](https://github.com/llbxg/hundun/blob/main/docs/img/sample_lorenz_embedding_2.png?raw=true)
 
 The result of calculation with D=3 and shifting T is shown below.
 
-![fig:embedding](docs/img/sample_embedding.png)
+![fig:embedding](https://github.com/llbxg/hundun/blob/main/docs/img/sample_embedding.png?raw=true)
 
 ### Estimate the time lag
+
+#### Autocorrelation Function
+```python
+def acf(u_seq, tau):
+```
+Calculate the autocorrelation function from the time series data. 
+Finds a point where the autocorrelation function can be considered 0.
+
+In the example below, the time lag is determined based on Bartlett's formula.
+Other conditions include the first local minimums and 1/e or less.
+
+```python
+from hundun.exploration import acf, get_minidx_below_seq, bartlett
+from hundun.utils import Drawing
+import numpy as np
+
+
+u_seq = np.load('lorenz_x.npy')
+
+rho_seq = acf(u_seq, 400)
+var_seq = bartlett(rho_seq)
+idx_list = get_minidx_below_seq(rho_seq, var_seq)
+
+
+d = Drawing()
+for i, idx in enumerate(idx_list):
+    d[0,0].plot(rho_seq[:, i], label='acf')
+    d[0,0].plot(var_seq[:, i], label='standard error')
+    d[0,0].scatter(idx, rho_seq[idx, i], zorder=10, marker='o')
+d[0,0].legend()
+d[0,0].axhline(0, color="black", linewidth=0.5, linestyle='dashed')
+d[0,0].set_axis_label('Time~lag', 'Correlation~coefficient')
+d.show()
+```
+
+![fig:mi](docs/img/sample_acf.png)
+
+
 #### Mutual Information
 ```python
 def mutual_info(u_seq, tau):
@@ -195,7 +235,7 @@ d[0,0].set_axis_label('Time~lag', 'Mutual~Information~[bit]')
 d.show()
 ```
 
-![fig:mi](docs/img/sample_mi.png)
+![fig:mi](https://github.com/llbxg/hundun/blob/main/docs/img/sample_mi.png?raw=true)
 
 ### Estimate the generalized dimension
 
@@ -242,7 +282,7 @@ d[0,1].set_axis_label('Embedding ~dimension', 'Correlation ~dimension')
 d.show()
 ```
 
-![fig:gp](docs/img/sample_calc_D_gp.png)
+![fig:gp](https://github.com/llbxg/hundun/blob/main/docs/img/sample_calc_D_gp.png?raw=true)
 
 In the GP-method, D2 is calculated directly from the attractor.
 It cannot be evaluated accurately from 1-dim data.
@@ -253,7 +293,11 @@ l = Lorenz.on_attractor()
 l.solve_n_times(5000)
 u_seq = l.u_seq
 ```
-![fig:gp_3dim](docs/img/sample_calc_D_gp_3dim.png)
+![fig:gp_3dim](https://github.com/llbxg/hundun/blob/main/docs/img/sample_calc_D_gp_3dim.png?raw=true)
+
+#### Lyapunov dimension
+Calculate using `calc_lyapunov_dimension`.   
+See here -> [[Lyapunov dimension]](#Lyapunov-dimension)
 
 ### Estimate the acceptable minimum embedding dimension
 
@@ -282,7 +326,7 @@ d[0,0].set_axis_label('Dimension', 'False~NN~Percentage')
 d.show()
 ```
 
-![fig:fnn](docs/img/sample_fnn.png)
+![fig:fnn](https://github.com/llbxg/hundun/blob/main/docs/img/sample_fnn.png?raw=true)
 
 #### Averaged False Neighbors - Algorithm
 
@@ -322,7 +366,7 @@ d[0,0].legend(loc='lower right')
 d.show()
 ```
 
-![fig:afn](docs/img/sample_afn.png)
+![fig:afn](https://github.com/llbxg/hundun/blob/main/docs/img/sample_afn.png?raw=true)
 
 #### Wayland Test
 [[Wayland_1993]](#Recognizing-determinism-in-a-time-series)
@@ -344,7 +388,65 @@ d[0,0].set_yscale('log')
 d.show()
 ```
 
-![fig:wayland](docs/img/sample_wayland.png)
+![fig:wayland](https://github.com/llbxg/hundun/blob/main/docs/img/sample_wayland.png?raw=true)
+
+### Visualization
+#### Recurrence Plot
+```python
+def calc_recurrence_plot(u_seq, rule=simple_threshold, *params, **kwargs):
+
+def show_recurrence_plot(u_seq, rule=simple_threshold, cmap=False, *params, **kwargs):
+```
+
+Create Recurrence Plot(RP) from time series data. 
+`calc_~` returns the result of RP as a matrix.
+`show_~` displays the result.
+
+
+```python
+from hundun.exploration import show_recurrence_plot
+import numpy as np
+
+u_seq = np.load('lorenz_x.npy')
+
+show_recurrence_plot(u_seq)
+```
+
+![fig:wayland](docs/img/sample_rp.png)
+
+The drawing rule uses the simplest one(`simple_threshold`). 
+
+```python
+def simple_threshold(ds, theta=0.5):
+    if (d_max:=_np.max(ds))!=0:
+        pv = (ds/d_max>theta)*255
+        return pv
+    return ds
+```
+
+This can be changed. The `rule` just takes a matrix and returns the matrix.
+
+
+```python
+from hundun.exploration import show_recurrence_plot
+import numpy as np
+
+
+def new_threshold(ds, func):
+    if (d_max:=np.max(ds))!=0:
+        pv = func(ds/d_max)*255
+        return np.uint8(pv)
+    return ds
+
+
+u_seq = np.load('lorenz_x.npy')
+
+show_recurrence_plot(u_seq, cmap=True, rule=new_threshold, func=np.log)
+```
+
+
+![fig:wayland](docs/img/sample_rp_2.png)
+
 
 ## Equations
 Some equations have already been defined.   
@@ -383,7 +485,7 @@ attractor = Lorenz.on_attractor()
 
 The calculation process is as shown in the figure from the blue point to the orange point.
 
-![fig:on_attractor](docs/img/set_on_attractor.png)
+![fig:on_attractor](https://github.com/llbxg/hundun/blob/main/docs/img/set_on_attractor.png?raw=true)
 
 
 #### solve_n_times
@@ -419,7 +521,7 @@ while True:
         break
 ```
 
-![fig:henon](docs/img/sample_henon.png)
+![fig:henon](https://github.com/llbxg/hundun/blob/main/docs/img/sample_henon.png?raw=true)
 
 ### Logistic map
 By default, `a=4.0` is set.
@@ -429,7 +531,7 @@ By default, `a=4.0` is set.
 
 ![x_{t+1}=ax_t(1-x_t)](https://render.githubusercontent.com/render/math?math=%5CLarge+%5Cdisplaystyle+x_%7Bt%2B1%7D%3Dax_t%281-x_t%29)   
 
-![fig:logistic](docs/img/sample_logistic.png)   
+![fig:logistic](https://github.com/llbxg/hundun/blob/main/docs/img/sample_logistic.png?raw=true)   
 
 
 ## Dynamical Systems
@@ -510,7 +612,7 @@ from hundun.equations.henon import Henon
 from matplotlib.colors import Normalize
 import numpy as np
 
-from hundun.lyapunov import calc_les
+from hundun import calc_les
 from hundun.utils import Drawing
 
 
@@ -541,7 +643,7 @@ for i in range(2):
     d[0,i].set_title(f'$\lambda_{i+1}$')
 d.show()
 ```
-![fig:henon_les](docs/img/sample_henon_les.png)
+![fig:henon_les](https://github.com/llbxg/hundun/blob/main/docs/img/sample_henon_les.png?raw=true)
 
 As an example, calculate the LE for parameter A of Logistic map.
 
@@ -572,7 +674,7 @@ d[0,0].set_ylim(-5, 1)
 d.show()
 ```
 
-![fig:lm_le](docs/img/sample_logistic_le_bif.png)
+![fig:lm_le](https://github.com/llbxg/hundun/blob/main/docs/img/sample_logistic_le_bif.png?raw=true)
 
 
 #### Differential
@@ -604,8 +706,36 @@ for j, system in enumerate([Lorenz, Lorenz_No_Jacobian]):
     d[0,j].set_ylim(-16, 3)
 d.show()
 ```
-![fig:henon](docs/img/sample_les_jaco_or_no.png)
+![fig:henon](https://github.com/llbxg/hundun/blob/main/docs/img/sample_les_jaco_or_no.png?raw=true)
 
+### Lyapunov dimension
+
+```python
+def calc_lyapunov_dimension(les):
+```
+
+Calculate the Lyapunov dimension from LEs.
+
+```python
+from hundun import calc_les, calc_lyapunov_dimension
+from hundun.equations import Lorenz
+
+
+_, les = calc_les(Lorenz)
+D_L = calc_lyapunov_dimension(les)
+print(D_L)
+```
+```bash
+2.0673058796702217
+```
+
+
+## To Do
+
+* Synchronization
+* Time series
+* Baisn of attraction
+* sample
 
 ## Dependencies
 

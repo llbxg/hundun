@@ -1,3 +1,6 @@
+from itertools import accumulate as _accumulate
+from operator import add as _add
+
 import numpy as _np
 from scipy import signal as _signal
 
@@ -47,3 +50,16 @@ def get_bottom(seq, threshold=float('inf')):
         else:
             lags.append(None)
     return tuple(lags)
+
+
+def bartlett(seq):
+    N, dim = seq.shape
+    N = len(seq)
+    var = [_np.ones(dim)/N,
+           *[(1+2*rho)/N for rho in _accumulate(seq[1:,]**2, _add)]]
+    return _np.array(var)**(1/2)
+
+
+def get_minidx_below_seq(rho_seq, var_seq):
+    _, dim = rho_seq.shape
+    return [(rho_seq[:, i]<var_seq[:, i]).argmax() for i in range(dim)]
