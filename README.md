@@ -729,6 +729,79 @@ print(D_L)
 2.0673058796702217
 ```
 
+## Synchronization
+
+### Synchronization class
+Use the `Synchronization` class to analyze chaos synchronization.
+
+Set the data transmitted by the oscillator with `.signal`. This class needs to define the sender and the receiver. In many papers, they are referred to as Drive and Response, but in this library they are referred to as `leading` and `supporting`. 
+
+In addition to taking `t` and `u` as arguments, methods can receive data. Any name is available.
+
+```python
+from hundun import Synchronization
+from hundun.equations import Lorenz
+
+
+class Pecora(Lorenz, Synchronization):
+
+    def signal(self):
+        self.signal_sent = self.u[0]
+        return self.u[0]
+
+    def leading(self, t, u):
+        s, r, b = self.s, self.r, self.b
+
+        x, y, z = u
+
+        x_dot = s*(y - x)
+        y_dot = r*self.signal_sent  - y - self.signal_sent *z
+        z_dot = self.signal_sent *y - b*z
+
+        return x_dot, y_dot, z_dot
+
+    def supporting(self, t, u, signal_received):
+        x_rec = signal_received
+        s, r, b = self.s, self.r, self.b
+
+        x, y, z = u
+
+        x_dot = s*(y - x)
+        y_dot = r*x_rec  - y - x_rec *z
+        z_dot = x_rec *y - b*z
+
+        return x_dot, y_dot, z_dot
+```
+
+### one-way coupling
+```python
+def coupling_oneway(o1, o2, N):
+```
+
+Calculate N times while connected. As a result, check how the difference in the internal state has changed.
+
+```python
+from hundun import coupling_oneway
+from hundun.utils import Drawing
+import numpy as np
+
+
+o1 = Pecora.on_attractor()
+o2 = Pecora.on_attractor()
+
+o1, o2 = coupling_oneway(o1, o2, 1000)
+
+d = Drawing()
+for i in range(3):
+    e = o1.u_seq[:, i]-o2.u_seq[:, i]
+    d[0,0].plot(np.log(np.abs(e)), label=f'$e_{i+1}$')
+d[0,0].set_axis_label('step', 'error')
+d[0,0].legend()
+d.show()
+```
+
+![fig:henon_les](/docs/img/sample_sync_error.png)
+
 
 ## To Do
 
