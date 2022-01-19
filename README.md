@@ -207,7 +207,7 @@ d[0,0].set_axis_label('Time~lag', 'Correlation~coefficient')
 d.show()
 ```
 
-![fig:mi](docs/img/sample_acf.png)
+![fig:acf](https://github.com/llbxg/hundun/blob/main/docs/img/sample_acf.png?raw=true)
 
 
 #### Mutual Information
@@ -297,7 +297,7 @@ u_seq = l.u_seq
 
 #### Lyapunov dimension
 Calculate using `calc_lyapunov_dimension`.   
-See here -> [[Lyapunov dimension]](#Lyapunov-dimension)
+See here -> [[Lyapunov dimension]](#Lyapunov-dimension-1)
 
 ### Estimate the acceptable minimum embedding dimension
 
@@ -412,7 +412,7 @@ u_seq = np.load('lorenz_x.npy')
 show_recurrence_plot(u_seq)
 ```
 
-![fig:wayland](docs/img/sample_rp.png)
+![fig:rp1](https://github.com/llbxg/hundun/blob/main/docs/img/sample_rp.png?raw=true)
 
 The drawing rule uses the simplest one(`simple_threshold`). 
 
@@ -445,7 +445,7 @@ show_recurrence_plot(u_seq, cmap=True, rule=new_threshold, func=np.log)
 ```
 
 
-![fig:wayland](docs/img/sample_rp_2.png)
+![fig:rp2](https://github.com/llbxg/hundun/blob/main/docs/img/sample_rp_2.png?raw=true)
 
 
 ## Equations
@@ -729,6 +729,79 @@ print(D_L)
 2.0673058796702217
 ```
 
+## Synchronization
+
+### Synchronization class
+Use the `Synchronization` class to analyze chaos synchronization.
+
+Set the data transmitted by the oscillator with `.signal`. This class needs to define the sender and the receiver. In many papers, they are referred to as Drive and Response, but in this library they are referred to as `leading` and `supporting`. 
+
+In addition to taking `t` and `u` as arguments, methods can receive data. Any name is available.
+
+```python
+from hundun import Synchronization
+from hundun.equations import Lorenz
+
+
+class Pecora(Lorenz, Synchronization):
+
+    def signal(self):
+        self.signal_sent = self.u[0]
+        return self.u[0]
+
+    def leading(self, t, u):
+        s, r, b = self.s, self.r, self.b
+
+        x, y, z = u
+
+        x_dot = s*(y - x)
+        y_dot = r*self.signal_sent  - y - self.signal_sent *z
+        z_dot = self.signal_sent *y - b*z
+
+        return x_dot, y_dot, z_dot
+
+    def supporting(self, t, u, signal_received):
+        x_rec = signal_received
+        s, r, b = self.s, self.r, self.b
+
+        x, y, z = u
+
+        x_dot = s*(y - x)
+        y_dot = r*x_rec  - y - x_rec *z
+        z_dot = x_rec *y - b*z
+
+        return x_dot, y_dot, z_dot
+```
+
+### one-way coupling
+```python
+def coupling_oneway(o1, o2, N):
+```
+
+Calculate N times while connected. As a result, check how the difference in the internal state has changed.
+
+```python
+from hundun import coupling_oneway
+from hundun.utils import Drawing
+import numpy as np
+
+
+o1 = Pecora.on_attractor()
+o2 = Pecora.on_attractor()
+
+o1, o2 = coupling_oneway(o1, o2, 1000)
+
+d = Drawing()
+for i in range(3):
+    e = o1.u_seq[:, i]-o2.u_seq[:, i]
+    d[0,0].plot(np.log(np.abs(e)), label=f'$e_{i+1}$')
+d[0,0].set_axis_label('step', 'error')
+d[0,0].legend()
+d.show()
+```
+
+![fig:henon_les](/docs/img/sample_sync_error.png)
+
 
 ## To Do
 
@@ -746,34 +819,34 @@ print(D_L)
 
 ## Reference
 
-### Deterministic Nonperiodic Flow
-Edward N. Lorenz   
+#### Deterministic Nonperiodic Flow
+(1963) Edward N. Lorenz   
 DOI: 10.1175/1520-0469(1963)020<0130:DNF>2.0.CO;2
 
-### A two-dimensional mapping with a strange attractor
-M. Hénon   
+#### A two-dimensional mapping with a strange attractor
+(1976) M. Hénon   
 DOI: 10.1007/BF01608556
 
-### Simple mathematical models with very complicated dynamics
-Robert M. May   
+#### Simple mathematical models with very complicated dynamics
+(1976) Robert M. May   
 DOI: 10.1038/261459a0
 
-### Measuring the strangeness of strange attractors
-Peter Grassberger and Itamar Procaccia   
+#### Measuring the strangeness of strange attractors
+(1983) Peter Grassberger and Itamar Procaccia   
 DOI: 10.1016/0167-2789(83)90298-1
 
-###  Characterization of Strange Attractors
-Peter Grassberger and Itamar Procaccia   
+####  Characterization of Strange Attractors
+(1983) Peter Grassberger and Itamar Procaccia   
 DOI: 10.1103/PhysRevLett.50.346
 
-### Determining embedding dimension for phase-space reconstruction using a geometrical construction
+#### Determining embedding dimension for phase-space reconstruction using a geometrical construction
 (1992) Matthew B. Kennel, Reggie Brown, and Henry D. I. Abarbanel   
 DOI: 10.1103/PhysRevA.45.3403   
 
-### Practical method for determining the minimum embedding dimension of a scalar time series
+#### Practical method for determining the minimum embedding dimension of a scalar time series
 (1997) Liangyue Cao   
 DOI: 10.1016/S0167-2789(97)00118-8   
 
-### Recognizing determinism in a time series
+#### Recognizing determinism in a time series
 (1993) Wayland, Richard and Bromley, David and Pickett, Douglas and Passamante, Anthony   
 DOI: 10.1103/PhysRevLett.70.580
