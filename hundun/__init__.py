@@ -10,3 +10,4 @@ from .systems import *
 from .exploration import *
 from .exploration._utils import embedding
 from .lyapunov import calc_les, calc_lyapunov_dimension
+from .utils._draw import Drawing
