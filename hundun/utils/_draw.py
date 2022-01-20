@@ -8,7 +8,7 @@ import string as _string
 from itertools import cycle as _cycle
 
 
-config = {
+config_drawing = {
     'figure.subplot.hspace':0.4,
 
     'lines.linewidth':0.8,
@@ -58,7 +58,7 @@ def _set_axis_label(ax, *xyz_labels, tex=True):
 class Drawing(object):
 
     def __init__(self, rows=1, cols=1, number=False, three=False,
-                 figsize=None, dpi=150, space=None):
+                 figsize=None, dpi=150, space=None, config=None):
 
         if figsize is None:
             if rows <= cols:
@@ -66,7 +66,7 @@ class Drawing(object):
             else:
                 figsize = (3.14*2, 3.14*1.7*2)
 
-        _rcParams.update(config)
+        _rcParams.update(config or config_drawing)
 
         alphabets = _cycle(_string.ascii_lowercase)
 
