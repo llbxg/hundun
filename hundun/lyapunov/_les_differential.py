@@ -166,7 +166,7 @@ def calc_les_differential_w_orth(differential,
 
 def _make_model(differential, u0=None, h=0.01, **options):
     if u0 is None:
-        model = differential.on_attractor(**options)
+        model = differential.on_attractor(h=h, **options)
     else:
         model = differential(**options)
         model.u, model.t = u0, 0
