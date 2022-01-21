@@ -1,5 +1,5 @@
 MAJOR = 0
 MINOR = 1
-MICRO = 9
+MICRO = 10
 
 __version__ = f'{MAJOR}.{MINOR}.{MICRO}'

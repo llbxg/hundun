@@ -9,7 +9,7 @@ from ._tu import TU as _TU
 
 class DynamicalSystems(_ABC):
 
-    def __init__(self, t=None, u=None):
+    def __init__(self, t=None, u=None, **params):
         self.dim = 0
         self.parameter()
 
@@ -23,6 +23,8 @@ class DynamicalSystems(_ABC):
         self.u = u if u is not None else _np.zeros(self.dim)
 
         self._t_seq, self._u_seq = [], []
+
+        self.parameter(**params)
 
     @property
     def inf(self):
