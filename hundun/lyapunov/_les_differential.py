@@ -4,6 +4,11 @@ from operator import add as _add
 import numpy as _np
 
 
+def sorting(_les_seq, _les, dim):
+    l = [(_les[i], _les_seq[:, i]) for i in range(dim)]
+    return _np.array([s[1] for s in l]), _np.array([s[0] for s in l])
+
+
 def calc_les_differential(differential, **options):
 
     if differential().jacobian() is None:
@@ -46,7 +51,7 @@ def calc_les_differential_w_qr(differential,
 
     les_list = [l/(i*h) for i, l in enumerate(_accumulate(les, _add), 1)]
     les_average = _np.average(les_list[-n_average:], axis=0)
-    return _np.array(les_list), sorted(les_average, reverse=True)
+    return sorting(les_list, les_average, dim)
 
 
 def calc_max_le_differential(differential,
@@ -161,7 +166,7 @@ def calc_les_differential_w_orth(differential,
     les_average = [_np.average(l[-n_average:]) for l in les_list]
 
     les_average=sorted(les_average, reverse=True)
-    return _np.array(les_list).T, les_average
+    return sorting(_np.array(les_list).T, les_average, dim)
 
 
 def _make_model(differential, u0=None, h=0.01, **options):
