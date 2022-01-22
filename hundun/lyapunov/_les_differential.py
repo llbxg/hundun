@@ -51,7 +51,7 @@ def calc_les_differential_w_qr(differential,
 
     les_list = [l/(i*h) for i, l in enumerate(_accumulate(les, _add), 1)]
     les_average = _np.average(les_list[-n_average:], axis=0)
-    return sorting(les_list, les_average, dim)
+    return sorting(_np.array(les_list), les_average, dim)
 
 
 def calc_max_le_differential(differential,
