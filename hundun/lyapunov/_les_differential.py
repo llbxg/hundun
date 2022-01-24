@@ -22,11 +22,12 @@ def calc_les_differential_w_qr(differential,
                 h=0.001, N=100000, u0=None, n_average=100,
                 dynamic_para=None,
                 error_func=False,
+                dynamic_func=False,
                 **options):
 
     model = _make_model(differential, h=h, u0=u0, **options)
 
-    if error_func:
+    if error_func or dynamic_func:
         jacobian = model.dynamic_jacobian
         func_solve = lambda t, u, **option : \
             model.solve(t, u, f=model.dynamic_eq, **option)
@@ -58,11 +59,12 @@ def calc_max_le_differential(differential,
                      h=0.01, N=10000, u0=None, n_average=100, n_split=10,
                      dynamic_para=None,
                      error_func=False,
+                     dynamic_func=False,
                      **options):
 
     model = _make_model(differential, u0=u0, h=h, **options)
 
-    if error_func:
+    if error_func  or dynamic_func:
         func_solve = lambda t, u, **option : \
             model.solve(t, u, f=model.dynamic_eq, **option)
     else:
@@ -109,11 +111,12 @@ def calc_les_differential_w_orth(differential,
                   h=0.01, N=10000, u0=None, n_average=100,
                   dynamic_para=None,
                   error_func=False,
+                  dynamic_func=False,
                   **options):
 
     model = _make_model(differential, u0=u0, h=h, **options)
 
-    if error_func:
+    if error_func or dynamic_func:
         func_solve = lambda t, u, **option : \
             model.solve(t, u, f=model.dynamic_eq, **option)
     else:
