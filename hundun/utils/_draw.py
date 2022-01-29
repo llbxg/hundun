@@ -128,17 +128,15 @@ class Drawing(object):
 
     @classmethod
     def plot_a_and_b(cls, u_seq_a , u_seq_b, legend=True,
-                     color=None, name=None, *args, **kwargs):
+                     color=None, name=None, u_seq_more=[], *args, **kwargs):
         d = cls(1, 2, *args, **kwargs)
         ax_label = ['x', 'y', 'z']
-        color = color or ['red', 'blue']
-        name = name or ['a', 'b']
         for i, (a, b) in enumerate(zip([0, 2], [1, 1])):
-            for j, u_seq in enumerate([u_seq_a, u_seq_b]):
-                c = color[j]
-                d[0,i].plot(u_seq[:, a], u_seq[:, b],
-                            color=c, label=f'${name[j]}$')
-
+            color_cycle = _cycle(color or ['red', 'blue'])
+            name_cycle = _cycle(name or ['a', 'b'])
+            for u_seq in [u_seq_a, u_seq_b, *u_seq_more]:
+                c, n = next(color_cycle), next(name_cycle)
+                d[0,i].plot(u_seq[:, a], u_seq[:, b], color=c, label=f'${n}$')
                 d[0,i].scatter(u_seq[0, a], u_seq[0, b],
                                color=c, s=40, marker='o',
                                zorder=10, edgecolor='white')
