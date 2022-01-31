@@ -127,14 +127,16 @@ class Drawing(object):
         _plt.close()
 
     @classmethod
-    def plot_a_and_b(cls, u_seq_a , u_seq_b, legend=True,
+    def plot_a_and_b(cls, u_seq_a , u_seq_b=None, /, legend=True,
                      color=None, name=None, u_seq_more=[], *args, **kwargs):
         d = cls(1, 2, *args, **kwargs)
         ax_label = ['x', 'y', 'z']
         for i, (a, b) in enumerate(zip([0, 2], [1, 1])):
             color_cycle = _cycle(color or ['red', 'blue'])
             name_cycle = _cycle(name or ['a', 'b'])
-            for u_seq in [u_seq_a, u_seq_b, *u_seq_more]:
+            new_seq_list = ([u_seq_a] if u_seq_b is None
+                            else [u_seq_a, u_seq_b, *u_seq_more])
+            for u_seq in new_seq_list:
                 c, n = next(color_cycle), next(name_cycle)
                 d[0,i].plot(u_seq[:, a], u_seq[:, b], color=c, label=f'${n}$')
                 d[0,i].scatter(u_seq[0, a], u_seq[0, b],
