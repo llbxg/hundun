@@ -58,7 +58,8 @@ def _set_axis_label(ax, *xyz_labels, tex=True):
 class Drawing(object):
 
     def __init__(self, rows=1, cols=1, number=False, three=False,
-                 figsize=None, dpi=150, space=None, config=None):
+                 figsize=None, dpi=150, space=None, config=None,
+                 number_place=None, number_size=None):
 
         if figsize is None:
             if rows <= cols:
@@ -100,8 +101,11 @@ class Drawing(object):
         axis = _np.array(axis).reshape((rows, cols))
 
         if number:
+            x = 0.95 if number_place is None else number_place[0]
+            y = 0.92 if number_place is None else number_place[1]
+            size = (12 if number_size is None else number_size)
             for ax in _np.ravel(axis):
-                ax.set_title(f'({next(alphabets)})', x=0.95, y=0.92)
+                ax.set_title(f'({next(alphabets)})', x=x, y=y, fontsize=size)
 
         for ax in axis.flatten():
             ax.set_axis_label =  _partial(_set_axis_label, ax)
