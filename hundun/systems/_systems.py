@@ -49,6 +49,12 @@ class DynamicalSystems(_ABC):
         c.settle_on_attractor(t0, u0, h=h, T_0=T_0)
         return c
 
+    @classmethod
+    def get_u_seq(cls, n, *args, **kwargs):
+        c = cls.on_attractor(*args, **kwargs)
+        c.solve_n_times(n)
+        return c.u_seq
+
     @_abstractmethod
     def equation(self, t, u):
         """equation"""
