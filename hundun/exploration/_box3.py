@@ -29,7 +29,7 @@ def calc_dimension_capacity(u_seq, depsilon=0.02, base=7, loop=250,
     if scale_down:
         u_seq = _scale_down(u_seq)
 
-    result = _calc_capacity_dimension(dim, u_seq, batch_ave,
+    result = _calc_q_dimension(dim, u_seq, batch_ave,
                                       depsilon, base, loop, min_correlation)
 
     if plot:
@@ -38,9 +38,10 @@ def calc_dimension_capacity(u_seq, depsilon=0.02, base=7, loop=250,
     return result.dimension
 
 
-def _calc_capacity_dimension(dim, u_seq, batch_ave, depsilon, base, loop,
-                             min_correlation, mode='most'):
-    log_frac_1_eps, log_Ns = _counting(dim, u_seq, depsilon, base, loop)
+def _calc_q_dimension(dim, u_seq, batch_ave, depsilon, base, loop,
+                             min_correlation, mode='most', q='capacity'):
+
+    log_frac_1_eps, log_Ns = _counting(dim, u_seq, depsilon, base, loop, q)
     dimensions = log_Ns / log_frac_1_eps
 
     args = (log_Ns, log_frac_1_eps, batch_ave)
@@ -51,26 +52,11 @@ def _calc_capacity_dimension(dim, u_seq, batch_ave, depsilon, base, loop,
 
     dimension = _np.average(dimensions[idx:idx+batch_ave])
 
-    return _BoxDimensionResult(dimension, idx,
+    return _BoxDimensionResult(float(dimension), idx,
                                min_correlation,
                                correlations, slopes, intercepts,
                                log_frac_1_eps, log_Ns,
                                dimensions)
-
-def _counting(dim, u_seq, depsilon, base, loop):
-    '''
-    epsilonごとに分割してカウントを行う。
-    '''
-    epsilon_list = _make_epsilon_list(depsilon, base, loop)
-
-    log_frac_1_ep_list, log_N_list = [], []
-
-    for ep in epsilon_list:
-        log_N = _box_counting(dim, u_seq, ep)
-        log_N_list.append(log_N)
-        log_frac_1_ep_list.append(_np.log(1/ep))
-
-    return _np.array(log_frac_1_ep_list), _np.array(log_N_list)
 
 
 def _box_counting(dim, u_seq, ep):
@@ -108,6 +94,25 @@ def _box_counting(dim, u_seq, ep):
         N = 0
 
     return _np.log(N)
+
+
+def _counting(dim, u_seq, depsilon, base, loop, func):
+    '''
+    epsilonごとに分割してカウントを行う。
+    '''
+
+    _func = _box_counting
+
+    epsilon_list = _make_epsilon_list(depsilon, base, loop)
+
+    log_frac_1_ep_list, log_N_list = [], []
+
+    for ep in epsilon_list:
+        log_N = _func(dim, u_seq, ep)
+        log_N_list.append(log_N)
+        log_frac_1_ep_list.append(_np.log(1/ep))
+
+    return _np.array(log_frac_1_ep_list), _np.array(log_N_list)
 
 
 def _get_correlations_and_slopes(h_seq, v_seq, batch_ave):
