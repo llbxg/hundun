@@ -66,8 +66,8 @@ def _counting(dim, u_seq, depsilon, base, loop):
     log_frac_1_ep_list, log_N_list = [], []
 
     for ep in epsilon_list:
-        N = _box_counting(dim, u_seq, ep)
-        log_N_list.append(_np.log(N))
+        log_N = _box_counting(dim, u_seq, ep)
+        log_N_list.append(log_N)
         log_frac_1_ep_list.append(_np.log(1/ep))
 
     return _np.array(log_frac_1_ep_list), _np.array(log_N_list)
@@ -107,7 +107,7 @@ def _box_counting(dim, u_seq, ep):
     else:
         N = 0
 
-    return N
+    return _np.log(N)
 
 
 def _get_correlations_and_slopes(h_seq, v_seq, batch_ave):
