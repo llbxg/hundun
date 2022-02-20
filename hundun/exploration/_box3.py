@@ -5,8 +5,8 @@ import numpy as _np
 from ..utils import Drawing as _Drawing
 
 
-class _BoxDimensionResult(_NamedTuple):
-    dimension : float  # 容量次元
+class _DimensionResult(_NamedTuple):
+    dimension : float  # 次元
     idx_dimension : int  # 最も相関係数が高かった時のインデックス
 
     min_correlation : float #
@@ -19,136 +19,161 @@ class _BoxDimensionResult(_NamedTuple):
     dimensions : _np.ndarray  # 定義に沿った容量次元
 
 
-def calc_dimension_capacity(u_seq, depsilon=0.02, base=7, loop=250,
-                            min_correlation=0.999,
-                            scale_down=True, batch_ave=10,  plot=True,
-                            path_save_plot=None):
+class CalcDimension(object):
 
-    dim, u_seq = _check_dim(u_seq)
+    def __init__(self, u_seq, scale_down, depsilon, base, loop,
+                 batch_ave, min_correlation, plot, path_save_plot):
+        self.dim, self.u_seq = self.check_dim(u_seq)
+        if scale_down:
+            self.u_seq = _scale_down(self.u_seq)
 
-    if scale_down:
-        u_seq = _scale_down(u_seq)
+        self.batch_ave = batch_ave
+        self.plot = plot
+        self.min_correlation = min_correlation
+        self.config_accuracy = (depsilon, base, loop)
+        self.path_save_plot = path_save_plot
 
-    result = _calc_q_dimension(dim, u_seq, batch_ave,
-                                      depsilon, base, loop, min_correlation)
+    def __call__(self):
+        result = self.main()
 
-    if plot:
-        _check_box_dimension(result, batch_ave, path_save_plot)
+        if self.plot:
+            _check_box_dimension(result, self.batch_ave, self.path_save_plot)
 
-    return result.dimension
+        return result.dimension
 
+    def main(self):
+        accuracies, values = self.calc()
 
-def _calc_q_dimension(dim, u_seq, batch_ave, depsilon, base, loop,
-                             min_correlation, mode='most', q='capacity'):
+        log_accuracies, log_values = _np.log(1/accuracies), _np.log(values)
+        dimensions = log_values / log_accuracies
 
-    log_frac_1_eps, log_Ns = _counting(dim, u_seq, depsilon, base, loop, q)
-    dimensions = log_Ns / log_frac_1_eps
+        correlations, slopes, intercepts = \
+            self._get_correlations_and_slopes(log_values, log_accuracies)
 
-    args = (log_Ns, log_frac_1_eps, batch_ave)
-    correlations, slopes, intercepts = _get_correlations_and_slopes(*args)
+        idx = self._decide_idx_ref_mode(correlations)
 
-    idx = _decide_idx_ref_mode(correlations, slopes, mode=mode,
-                               min_correlation=min_correlation)
+        dimension = _np.average(dimensions[idx:idx+self.batch_ave])
 
-    dimension = _np.average(dimensions[idx:idx+batch_ave])
+        return _DimensionResult(float(dimension), idx, self.min_correlation,
+                                correlations, slopes, intercepts,
+                                log_accuracies, log_values, dimensions)
 
-    return _BoxDimensionResult(float(dimension), idx,
-                               min_correlation,
-                               correlations, slopes, intercepts,
-                               log_frac_1_eps, log_Ns,
-                               dimensions)
+    def calc(self):
+        '''
+        accuracyごとに計算(func)を行う.
+        '''
+        accuracies = self.make_accuracies(*self.config_accuracy)
+        value_list = [self.func(epsilon) for epsilon in accuracies]
+        return accuracies, _np.array(value_list)
 
+    def func(self, epsilon):
+        '''
+        value = func(epsilon)
+        '''
 
-def _box_counting(dim, u_seq, ep):
+        x = self.u_seq[:, 0]
+        xedges = self.make_edges(x, epsilon)
+
+        if self.dim == 1:
+            value = self.func_for_1dim(x, xedges)
+
+        elif self.dim == 2:
+            y = self.u_seq[:, 1]
+            yedges = self.make_edges(y, epsilon)
+            value = self.func_for_2dim(x, y, xedges, yedges)
+
+        elif self.dim == 3:
+            y, z = self.u_seq[:, 1], self.u_seq[:, 2]
+            yedges = self.make_edges(y, epsilon)
+            zedges = self.make_edges(z, epsilon)
+            value = 0
+            for z_left in zedges:
+                z_right = z_left + epsilon
+                new_u_seq = self.u_seq[(z_left<z) & (z<=z_right)]
+                new_x, new_y = new_u_seq[:, 0], new_u_seq[:, 1]
+                value += self.func_for_2dim(new_x, new_y, xedges, yedges)
+
+        else:
+            value = 0
+
+        return value
+
+    def func_for_1dim(self, x, xedges):
+        return 0
+
+    def func_for_2dim(self, x, y, xedges, yedges):
+        return 0
+
+    def _decide_idx_ref_mode(self, correlations):
+        correlations_over = _np.where(
+            correlations>=self.min_correlation, correlations, 0)
+
+        idx = int(_np.argmax(correlations_over))
+
+        return idx
+
+    def _get_correlations_and_slopes(self, h_seq, v_seq):
+        batch_ave = self.batch_ave
+        correlation_list, slope_list, intercept_list = [], [], []
+
+        for i in range(len(h_seq)-batch_ave):
+            h_seq_batch, v_seq_batch = h_seq[i:i+batch_ave], v_seq[i:i+batch_ave]
+
+            correlation = _np.corrcoef(h_seq_batch, v_seq_batch)[0, 1]
+            correlation_list.append(correlation)
+
+            slope_now, intercept = _np.polyfit(v_seq_batch, h_seq_batch, 1)
+            slope_list.append(slope_now)
+            intercept_list.append(intercept)
+
+        correlations = _np.array(correlation_list)
+        slopes = _np.array(slope_list)
+        intercepts = _np.array(intercept_list)
+
+        return correlations, slopes, intercepts
+
+    @staticmethod
     def make_edges(a, ep):
         return _np.arange(_np.min(a)-ep, _np.max(a)+ep, ep)
 
-    def counting(x, y, bins):
-        H, _, _ =  _np.histogram2d(x, y, bins=bins)
+    @staticmethod
+    def check_dim(u_seq):
+        if len(u_seq.shape)==1:
+            u_seq = u_seq.reshape(len(u_seq), 1)
+        return u_seq.shape[1], u_seq
+
+    @staticmethod
+    def make_accuracies(depsilon=0.02, base=7, loop=250):
+        '''
+        eベースでのaccuracyを作成する. 刻み幅はdepsilonとし,
+        最小はe^(-base), 最大はe^((loop-1)*depsilon-base)となる.
+        デフォルトではe^(-2)からe^(-7)のaccuracyのリストを返す.
+        '''
+        epsilon_list = [_np.e**(i*depsilon-base) for i in range(loop+1)]
+        return _np.array(epsilon_list)[::-1]
+
+
+class Capacity(CalcDimension):
+
+    def func_for_1dim(self, x, xedges):
+        H, _ = _np.histogram(x, bins=xedges)
         return _np.sum(H>0)
 
-    x = u_seq[:, 0]
-    xedges = make_edges(x, ep)
-
-    if dim == 1:
-        H, _ = _np.histogram(x, bins=xedges)
-        N = _np.sum(H>0)
-
-    elif dim == 2:
-        y = u_seq[:, 1]
-        yedges = make_edges(y, ep)
-        N = counting(x, y, (xedges, yedges))
-
-    elif dim ==3:
-        y, z = u_seq[:, 1], u_seq[:, 2]
-        yedges = make_edges(y, ep)
-        zedges = make_edges(z, ep)
-        N = 0
-        for z_left in zedges:
-            z_right = z_left+ep
-            new_u_seq = u_seq[(z_left<z) & (z<=z_right)]
-            new_x, new_y = new_u_seq[:, 0], new_u_seq[:, 1]
-            N += counting(new_x, new_y, (xedges, yedges))
-
-    else:
-        N = 0
-
-    return _np.log(N)
+    def func_for_2dim(self, x, y, xedges, yedges):
+        H, _, _ =  _np.histogram2d(x, y, bins=(xedges, yedges))
+        return _np.sum(H>0)
 
 
-def _counting(dim, u_seq, depsilon, base, loop, func):
-    '''
-    epsilonごとに分割してカウントを行う。
-    '''
+def calc_dimension_capacity(u_seq, depsilon=0.02, base=7, loop=250,
+                            min_correlation=0.999, scale_down=True,
+                            batch_ave=10,  plot=True, path_save_plot=None):
 
-    _func = _box_counting
+    capacity = Capacity(u_seq, scale_down=scale_down,
+                        depsilon=depsilon, base=base, loop=loop,
+                        batch_ave=batch_ave, min_correlation=min_correlation,
+                        plot=plot, path_save_plot=path_save_plot)
 
-    epsilon_list = _make_epsilon_list(depsilon, base, loop)
-
-    log_frac_1_ep_list, log_N_list = [], []
-
-    for ep in epsilon_list:
-        log_N = _func(dim, u_seq, ep)
-        log_N_list.append(log_N)
-        log_frac_1_ep_list.append(_np.log(1/ep))
-
-    return _np.array(log_frac_1_ep_list), _np.array(log_N_list)
-
-
-def _get_correlations_and_slopes(h_seq, v_seq, batch_ave):
-    correlation_list, slope_list, intercept_list = [], [], []
-
-    for i in range(len(h_seq)-batch_ave):
-        h_seq_batch, v_seq_batch = h_seq[i:i+batch_ave], v_seq[i:i+batch_ave]
-
-        correlation = _np.corrcoef(h_seq_batch, v_seq_batch)[0, 1]
-        correlation_list.append(correlation)
-
-        slope_now, intercept = _np.polyfit(v_seq_batch, h_seq_batch, 1)
-        slope_list.append(slope_now)
-        intercept_list.append(intercept)
-
-    correlations = _np.array(correlation_list)
-    slopes = _np.array(slope_list)
-    intercepts = _np.array(intercept_list)
-
-    return correlations, slopes, intercepts
-
-
-def _decide_idx_ref_mode(correlations, slopes, mode, min_correlation=0.999):
-    correlations_over = _np.where(
-        correlations>=min_correlation, correlations, 0)
-    slopes_over = _np.where(
-        correlations>=min_correlation, slopes, 0)
-
-    if mode=='most':
-        idx = int(_np.argmax(correlations_over))
-    elif mode=='max':
-        idx = int(_np.argmax(slopes_over))
-    else:
-        idx = 0
-
-    return idx
+    return capacity()
 
 
 def _check_box_dimension(result, batch, path_save_plot):
@@ -237,16 +262,6 @@ def _check_box_dimension(result, batch, path_save_plot):
 
     d.show()
     d.close()
-
-
-def _check_dim(u_seq):
-    if len(u_seq.shape)==1:
-        u_seq = u_seq.reshape(len(u_seq), 1)
-    return u_seq.shape[1], u_seq
-
-
-def _make_epsilon_list(depsilon=0.02, base=7, loop=250):
-    return _np.array([_np.e**(i*depsilon-base) for i in range(loop)])[::-1]
 
 
 def _scale_down(seq):
