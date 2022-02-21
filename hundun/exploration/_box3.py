@@ -33,22 +33,26 @@ class CalcDimension(object):
         self.config_accuracy = (depsilon, base, loop)
         self.path_save_plot = path_save_plot
 
+        self.length = len(self.u_seq)
+
     def __call__(self):
         result = self.main()
 
         if self.plot:
-            _check_box_dimension(result, self.batch_ave, self.path_save_plot)
+            _plot(result, self.batch_ave, self.path_save_plot)
 
         return result.dimension
 
     def main(self):
         accuracies, values = self.calc()
 
-        log_accuracies, log_values = _np.log(1/accuracies), _np.log(values)
-        dimensions = log_values / log_accuracies
+        # here ;;
+        log_accuracies = _np.log(1/accuracies)
+        new_values =  self.wrap_value_in_main(values)
+        dimensions = new_values / log_accuracies
 
         correlations, slopes, intercepts = \
-            self._get_correlations_and_slopes(log_values, log_accuracies)
+            self._get_correlations_and_slopes(new_values, log_accuracies)
 
         idx = self._decide_idx_ref_mode(correlations)
 
@@ -56,7 +60,7 @@ class CalcDimension(object):
 
         return _DimensionResult(float(dimension), idx, self.min_correlation,
                                 correlations, slopes, intercepts,
-                                log_accuracies, log_values, dimensions)
+                                log_accuracies, new_values, dimensions)
 
     def calc(self):
         '''
@@ -86,17 +90,18 @@ class CalcDimension(object):
             y, z = self.u_seq[:, 1], self.u_seq[:, 2]
             yedges = self.make_edges(y, epsilon)
             zedges = self.make_edges(z, epsilon)
-            value = 0
+            value_list = []
             for z_left in zedges:
                 z_right = z_left + epsilon
                 new_u_seq = self.u_seq[(z_left<z) & (z<=z_right)]
                 new_x, new_y = new_u_seq[:, 0], new_u_seq[:, 1]
-                value += self.func_for_2dim(new_x, new_y, xedges, yedges)
+                value_list.append(self.func_for_2dim(new_x, new_y, xedges, yedges))
+            value = self.wrap_value_3dim(value_list)
 
         else:
             value = 0
 
-        return value
+        return self.wrap_value(value)
 
     def func_for_1dim(self, x, xedges):
         return 0
@@ -133,6 +138,18 @@ class CalcDimension(object):
         return correlations, slopes, intercepts
 
     @staticmethod
+    def wrap_value(value):
+        return value
+
+    @staticmethod
+    def wrap_value_3dim(value_list):
+        return sum(value_list)
+
+    @staticmethod
+    def wrap_value_in_main(values):
+        return _np.log(values)
+
+    @staticmethod
     def make_edges(a, ep):
         return _np.arange(_np.min(a)-ep, _np.max(a)+ep, ep)
 
@@ -164,19 +181,58 @@ class Capacity(CalcDimension):
         return _np.sum(H>0)
 
 
+class Information(CalcDimension):
+
+    def func_for_1dim(self, x, xedges):
+        H, _ = _np.histogram(x, bins=xedges)
+        p = H/self.length
+        return p[p>0]
+
+    def func_for_2dim(self, x, y, xedges, yedges):
+        H, _, _ =  _np.histogram2d(x, y, bins=(xedges, yedges))
+        p = H/self.length
+        return p[p>0]
+
+    @staticmethod
+    def wrap_value(p):
+        return -1*_np.sum(_np.multiply(p, _np.log(p)))
+
+    @staticmethod
+    def wrap_value_3dim(value_list):
+        return _np.concatenate(value_list)
+
+    @staticmethod
+    def wrap_value_in_main(values):
+        return values
+
+
 def calc_dimension_capacity(u_seq, depsilon=0.02, base=7, loop=250,
                             min_correlation=0.999, scale_down=True,
                             batch_ave=10,  plot=True, path_save_plot=None):
 
-    capacity = Capacity(u_seq, scale_down=scale_down,
-                        depsilon=depsilon, base=base, loop=loop,
-                        batch_ave=batch_ave, min_correlation=min_correlation,
-                        plot=plot, path_save_plot=path_save_plot)
+    capacity = Capacity(
+        u_seq, scale_down=scale_down,
+        depsilon=depsilon, base=base, loop=loop,
+        batch_ave=batch_ave, min_correlation=min_correlation,
+        plot=plot, path_save_plot=path_save_plot)
 
     return capacity()
 
 
-def _check_box_dimension(result, batch, path_save_plot):
+def calc_dimension_information(u_seq, depsilon=0.02, base=7, loop=250,
+                               min_correlation=0.999, scale_down=True,
+                               batch_ave=10,  plot=True, path_save_plot=None):
+
+    infomation = Information(
+        u_seq, scale_down=scale_down,
+        depsilon=depsilon, base=base, loop=loop,
+        batch_ave=batch_ave, min_correlation=min_correlation,
+        plot=plot, path_save_plot=path_save_plot)
+
+    return infomation()
+
+
+def _plot(result, batch, path_save_plot):
     color = {'b':'tab:blue', 'o':'tab:orange', 'g':'tab:green'}
 
     x = result.log_frac_1_eps
