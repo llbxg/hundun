@@ -46,8 +46,7 @@ class CalcDimension(object):
     def main(self):
         accuracies, values = self.calc()
 
-        # here ;;
-        log_accuracies = _np.log(1/accuracies)
+        log_accuracies = self.wrap_accuracies_in_main(accuracies)
         new_values =  self.wrap_value_in_main(values)
         dimensions = new_values / log_accuracies
 
@@ -140,6 +139,10 @@ class CalcDimension(object):
     @staticmethod
     def wrap_value(value):
         return value
+
+    @staticmethod
+    def wrap_accuracies_in_main(accuracies):
+        return _np.log(1/accuracies)
 
     @staticmethod
     def wrap_value_3dim(value_list):
