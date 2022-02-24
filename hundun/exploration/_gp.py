@@ -1,6 +1,7 @@
 # Grassberger-Procaccia Algorithm (グラスバーガー - プロカッチャ アルゴリズム)
 
 from itertools import combinations as _combinations
+import warnings as _warnings
 
 import numpy as _np
 
@@ -30,6 +31,10 @@ def calc_correlation_dimention_w_gp(e_seq,
     bは相関係数を計算するためのバッチサイズです。
     プロットの直線部分が相関係数0.999以上の場合の最大の勾配をD_2としている。
     """
+    msg = 'It will not be available after version 0.2. ' \
+          'Use `calc_dimension_correlation` instead.'
+    _warnings.warn(msg)
+
     if normalize:
         v_max = e_seq.max(axis=0, keepdims=True)
         v_min = e_seq.min(axis=0, keepdims=True)
