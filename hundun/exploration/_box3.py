@@ -234,7 +234,7 @@ class Correlation(CalcDimension):
         '''
         accuracies = self.make_accuracies(*self.config_accuracy)
         crs = 2*_np.array(
-            [_correlation_integrals(r, self.distance, len(u_seq))
+            [_correlation_integrals(r, self.distance, len(self.u_seq))
              for r in accuracies])
 
         return accuracies, _np.array(crs)
