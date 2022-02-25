@@ -1,7 +1,9 @@
 from functools import partial as _partial
+from os import path as _path
 
-import matplotlib.pyplot as _plt
 from matplotlib import rcParams as _rcParams
+import matplotlib.animation as _anm
+import matplotlib.pyplot as _plt
 import numpy as _np
 
 import string as _string
@@ -156,3 +158,73 @@ class Drawing(object):
             d[0, 0].legend()
 
         return d
+
+    @classmethod
+    def trajectory_3d(cls, u_seq, shadow=True, *args, **kargs):
+
+        x, y, z = u_seq[:, 0], u_seq[:, 1], u_seq[:, 2]
+        u_left = _np.min(u_seq, axis=0)
+        u_right = _np.max(u_seq, axis=0)
+        scale = (u_right - u_left)/3
+        u_left, u_right = u_left - scale, u_right + scale
+
+        config_drawing['axes.labelsize']=20
+        config_drawing['axes.labelpad']=0
+        kargs['config']=config_drawing
+
+        d = cls(1, 1, three=True, *args, **kargs)
+        ln, = d[0,0].plot([], [], [])
+
+        def settings():
+            d[0,0].set_xlim(u_left[0], u_right[0])
+            d[0,0].set_ylim(u_left[1], u_right[1])
+            d[0,0].set_zlim(u_left[2], u_right[2])
+            d[0,0].xaxis.pane.set_facecolor("white")
+            d[0,0].yaxis.pane.set_facecolor("white")
+            d[0,0].zaxis.pane.set_facecolor("white")
+            d[0,0].xaxis.pane.set_edgecolor('black')
+            d[0,0].yaxis.pane.set_edgecolor('black')
+            d[0,0].zaxis.pane.set_edgecolor('black')
+            d[0,0].xaxis.line.set_linewidth(0.2)
+            d[0,0].yaxis.line.set_linewidth(0.2)
+            d[0,0].zaxis.line.set_linewidth(0.2)
+
+            d[0,0].set_axis_label('x', 'y', 'z')
+            d[0,0].grid(False)
+            d[0,0].set_xticks([])
+            d[0,0].set_yticks([])
+            d[0,0].set_zticks([])
+
+            d[0,0].view_init(azim=127,elev=27)
+
+            return ln,
+
+        def update(i):
+            if i != 0:
+                _plt.cla()
+            settings()
+
+            s0 = slice(0, i+1)
+            s = slice(0,i+5)
+            s1 = slice(i, i+5)
+            l = len(x[s])
+
+            d[0,0].plot(x[s0], y[s0], z[s0], linewidth=0.2, color='blue')
+            d[0,0].scatter(x[s1], y[s1], z[s1],
+                           edgecolor=None, color='red', s=10)
+
+            if shadow:
+                setting = {'linewidth':0.2, 'color': 'gray'}
+                d[0,0].plot(x[s], y[s],  _np.full(l, u_left[2]), **setting)
+                d[0,0].plot(x[s],  _np.full(l, u_left[1]), z[s], **setting)
+                d[0,0].plot(_np.full(l, u_right[0]), y[s], z[s], **setting)
+
+                setting = {'s':2, 'color':'gray'}
+                d[0,0].scatter(x[s1], y[s1],  u_left[2], **setting)
+                d[0,0].scatter(x[s1],  u_left[1], z[s1], **setting)
+                d[0,0].scatter(u_right[0], y[s1], z[s1], **setting)
+
+        settings()
+        ani = _anm.FuncAnimation(d.fig, func=update, init_func=settings,
+                                 interval=10, blit=True, save_count=len(x))
+        return d, ani
