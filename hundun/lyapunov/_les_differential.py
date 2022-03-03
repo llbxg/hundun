@@ -6,7 +6,7 @@ import numpy as _np
 
 def sorting(_les_seq, _les, dim):
     l = [(_les[i], _les_seq[:, i]) for i in range(dim)]
-    return _np.array([s[1] for s in l]), _np.array([s[0] for s in l])
+    return _np.array([s[1] for s in l]).T, _np.array([s[0] for s in l])
 
 
 def calc_les_differential(differential, **options):
