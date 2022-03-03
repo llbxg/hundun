@@ -3,7 +3,7 @@ from operator import add as _add
 
 import numpy as _np
 from scipy import signal as _signal
-
+from scipy.stats import norm as _norm
 
 def reshape(u_seq):
     if (ndim:=u_seq.ndim) == 1:
@@ -52,12 +52,13 @@ def get_bottom(seq, threshold=float('inf')):
     return tuple(lags)
 
 
-def bartlett(seq):
-    N, dim = seq.shape
+def bartlett(seq, alpha=0.95):
+    _, dim = seq.shape
     N = len(seq)
     var = [_np.ones(dim)/N,
            *[(1+2*rho)/N for rho in _accumulate(seq[1:,]**2, _add)]]
-    return _np.array(var)**(1/2)
+    z = _norm.ppf(alpha)
+    return z*_np.array(var)**(1/2)
 
 
 def get_minidx_below_seq(rho_seq, var_seq):

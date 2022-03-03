@@ -4,6 +4,11 @@ from operator import add as _add
 import numpy as _np
 
 
+def sorting(_les_seq, _les, dim):
+    l = [(_les[i], _les_seq[:, i]) for i in range(dim)]
+    return _np.array([s[1] for s in l]).T, _np.array([s[0] for s in l])
+
+
 def calc_les_differential(differential, **options):
 
     if differential().jacobian() is None:
@@ -17,11 +22,12 @@ def calc_les_differential_w_qr(differential,
                 h=0.001, N=100000, u0=None, n_average=100,
                 dynamic_para=None,
                 error_func=False,
+                dynamic_func=False,
                 **options):
 
     model = _make_model(differential, h=h, u0=u0, **options)
 
-    if error_func:
+    if error_func or dynamic_func:
         jacobian = model.dynamic_jacobian
         func_solve = lambda t, u, **option : \
             model.solve(t, u, f=model.dynamic_eq, **option)
@@ -46,18 +52,19 @@ def calc_les_differential_w_qr(differential,
 
     les_list = [l/(i*h) for i, l in enumerate(_accumulate(les, _add), 1)]
     les_average = _np.average(les_list[-n_average:], axis=0)
-    return _np.array(les_list), sorted(les_average, reverse=True)
+    return sorting(_np.array(les_list), les_average, dim)
 
 
 def calc_max_le_differential(differential,
                      h=0.01, N=10000, u0=None, n_average=100, n_split=10,
                      dynamic_para=None,
                      error_func=False,
+                     dynamic_func=False,
                      **options):
 
     model = _make_model(differential, u0=u0, h=h, **options)
 
-    if error_func:
+    if error_func  or dynamic_func:
         func_solve = lambda t, u, **option : \
             model.solve(t, u, f=model.dynamic_eq, **option)
     else:
@@ -104,11 +111,12 @@ def calc_les_differential_w_orth(differential,
                   h=0.01, N=10000, u0=None, n_average=100,
                   dynamic_para=None,
                   error_func=False,
+                  dynamic_func=False,
                   **options):
 
     model = _make_model(differential, u0=u0, h=h, **options)
 
-    if error_func:
+    if error_func or dynamic_func:
         func_solve = lambda t, u, **option : \
             model.solve(t, u, f=model.dynamic_eq, **option)
     else:
@@ -161,12 +169,12 @@ def calc_les_differential_w_orth(differential,
     les_average = [_np.average(l[-n_average:]) for l in les_list]
 
     les_average=sorted(les_average, reverse=True)
-    return _np.array(les_list).T, les_average
+    return sorting(_np.array(les_list).T, les_average, dim)
 
 
 def _make_model(differential, u0=None, h=0.01, **options):
     if u0 is None:
-        model = differential.on_attractor(**options)
+        model = differential.on_attractor(h=h, **options)
     else:
         model = differential(**options)
         model.u, model.t = u0, 0

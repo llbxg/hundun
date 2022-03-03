@@ -13,25 +13,33 @@ def simple_threshold(ds, theta=0.5):
     return ds
 
 
-def calc_recurrence_plot(u_seq, rule=simple_threshold, *params, **kwargs):
+def calc_recurrence_plot(u_seq, rule=simple_threshold, *params, **kargs):
     size = len(u_seq)
     rp = _np.zeros((size,size))
 
     ds =  _np.array([_dist(u1, u2) for u1, u2 in _combinations(u_seq, 2)])
 
-    pv = rule(ds, *params, **kwargs)
+    pv = rule(ds, *params, **kargs)
 
     rp[_np.triu(_np.ones((size,size), dtype=bool), k=1)] = pv
 
     return rp+rp.T
 
 
-def show_recurrence_plot(u_seq, rule=simple_threshold, cmap=False, *params, **kwargs):
-    rp = calc_recurrence_plot(u_seq, rule, *params, **kwargs)
+def show_recurrence_plot(u_seq, rule=simple_threshold, cmap=False,
+                         path_save_plot=None,
+                         *params, **kargs):
+    rp = calc_recurrence_plot(u_seq, rule, *params, **kargs)
 
     d = _Drawing()
     im = d[0,0].imshow(rp, origin='lower')
     if cmap:
         d.fig.colorbar(im)
+
+    if path_save_plot is not None:
+        d.save(path_save_plot)
+
     d.show()
     d.close()
+
+    return rp

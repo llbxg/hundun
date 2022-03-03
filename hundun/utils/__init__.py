@@ -1,1 +1,1 @@
-from ._draw import Drawing
+from ._draw import Drawing, config_drawing

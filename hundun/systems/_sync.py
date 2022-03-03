@@ -65,7 +65,7 @@ def _check_oscillator(oscillators):
                 f'{o.__class__.__name__} need to have Synchronization')
 
 
-def coupling_oneway(o1, o2, N):
+def coupling_oneway(o1, o2, N, **params):
     _check_oscillator([o1, o2])
 
     for _ in range(N):
@@ -75,7 +75,7 @@ def coupling_oneway(o1, o2, N):
         params1 = _make_parameter(o1.leading, [signal2])
         params2 = _make_parameter(o2.supporting, [signal1])
 
-        o1.solve(*o1.internal_state, **params1)
-        o2.solve(*o2.internal_state, **params2)
+        o1.solve(*o1.internal_state, **dict(params1, **params))
+        o2.solve(*o2.internal_state, **dict(params2, **params))
 
     return o1, o2

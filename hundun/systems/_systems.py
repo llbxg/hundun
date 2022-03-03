@@ -9,7 +9,7 @@ from ._tu import TU as _TU
 
 class DynamicalSystems(_ABC):
 
-    def __init__(self, t=None, u=None):
+    def __init__(self, t=None, u=None, **params):
         self.dim = 0
         self.parameter()
 
@@ -23,6 +23,8 @@ class DynamicalSystems(_ABC):
         self.u = u if u is not None else _np.zeros(self.dim)
 
         self._t_seq, self._u_seq = [], []
+
+        self.parameter(**params)
 
     @property
     def inf(self):
@@ -46,6 +48,12 @@ class DynamicalSystems(_ABC):
         c.parameter(**params)
         c.settle_on_attractor(t0, u0, h=h, T_0=T_0)
         return c
+
+    @classmethod
+    def get_u_seq(cls, n, *args, **kwargs):
+        c = cls.on_attractor(*args, **kwargs)
+        c.solve_n_times(n)
+        return c.u_seq
 
     @_abstractmethod
     def equation(self, t, u):

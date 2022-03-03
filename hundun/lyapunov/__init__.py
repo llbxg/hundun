@@ -26,4 +26,4 @@ def calc_les(system, **options):
     if not issubclass(system, _DynamicalSystems):
         raise TypeError(f"{system} must be a DynamicalSystems")
 
-    return _np.zeros((3, 3)), (None, None, None)
+    return _np.zeros((3, 3)), (0, 0, 0)
