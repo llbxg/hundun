@@ -173,9 +173,41 @@ class Drawing(object):
         kargs['config']=config_drawing
 
         d = cls(1, 1, three=True, *args, **kargs)
-        ln, = d[0,0].plot([], [], [])
 
-        def settings():
+        main_plot, = d[0,0].plot([], [], [], color='blue', linewidth=0.2)
+        sub_plot, = d[0,0].plot([], [], [], color='red', linestyle="",
+                                marker="o", markersize=1)
+
+        if shadow:
+            setting = {'linewidth':0.1, 'color': 'gray'}
+            shadow_plot_1, = d[0,0].plot([], [],  [], **setting)
+            shadow_plot_2, = d[0,0].plot([], [],  [], **setting)
+            shadow_plot_3, = d[0,0].plot([], [],  [], **setting)
+
+        def update(frame):
+            s1 = slice(frame-1, frame+4)
+            main_plot.set_data (x[0:frame], y[0:frame])
+            main_plot.set_3d_properties(z[0:frame])
+
+            sub_plot.set_data(x[s1], y[s1])
+            sub_plot.set_3d_properties(z[s1])
+
+            s = slice(0,frame+5)
+            l = len(x[s])
+            if shadow:
+                plot_list = [shadow_plot_1, shadow_plot_2, shadow_plot_3]
+                g_list = [(x[s], y[s], _np.full(l, u_left[2])),
+                          (x[s],  _np.full(l, u_left[1]), z[s]),
+                          (_np.full(l, u_right[0]), y[s], z[s])]
+                for p, (x_s, y_s, z_s) in zip(plot_list, g_list):
+                    p.set_data(x_s, y_s)
+                    p.set_3d_properties(z_s)
+                return main_plot, sub_plot, *plot_list
+
+            else:
+                return main_plot, sub_plot
+
+        def init():
             d[0,0].set_xlim(u_left[0], u_right[0])
             d[0,0].set_ylim(u_left[1], u_right[1])
             d[0,0].set_zlim(u_left[2], u_right[2])
@@ -197,34 +229,10 @@ class Drawing(object):
 
             d[0,0].view_init(azim=127,elev=27)
 
-            return ln,
+            return main_plot,
 
-        def update(i):
-            if i != 0:
-                _plt.cla()
-            settings()
+        init()
+        ani = _anm.FuncAnimation(d.fig, func=update, init_func=init,
+                                 interval=30, blit=True, save_count=len(x))
 
-            s0 = slice(0, i+1)
-            s = slice(0,i+5)
-            s1 = slice(i, i+5)
-            l = len(x[s])
-
-            d[0,0].plot(x[s0], y[s0], z[s0], linewidth=0.2, color='blue')
-            d[0,0].scatter(x[s1], y[s1], z[s1],
-                           edgecolor=None, color='red', s=10)
-
-            if shadow:
-                setting = {'linewidth':0.2, 'color': 'gray'}
-                d[0,0].plot(x[s], y[s],  _np.full(l, u_left[2]), **setting)
-                d[0,0].plot(x[s],  _np.full(l, u_left[1]), z[s], **setting)
-                d[0,0].plot(_np.full(l, u_right[0]), y[s], z[s], **setting)
-
-                setting = {'s':2, 'color':'gray'}
-                d[0,0].scatter(x[s1], y[s1],  u_left[2], **setting)
-                d[0,0].scatter(x[s1],  u_left[1], z[s1], **setting)
-                d[0,0].scatter(u_right[0], y[s1], z[s1], **setting)
-
-        settings()
-        ani = _anm.FuncAnimation(d.fig, func=update, init_func=settings,
-                                 interval=10, blit=True, save_count=len(x))
         return d, ani
