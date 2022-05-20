@@ -18,13 +18,13 @@ See [hundun.wiki](https://github.com/llbxg/hundun/wiki) for details.
 ![image:calc_dimension_capacity](https://raw.githubusercontent.com/wiki/llbxg/hundun/image/dimension_capacity.png)
 
 
-### [show_recurrence_plot](https://github.com/llbxg/hundun/wiki/Visualization#show_recurrence_plot)
+### [`show_recurrence_plot`](https://github.com/llbxg/hundun/wiki/Visualization#show_recurrence_plot)
 ![image:show_recurrence_plot](https://raw.githubusercontent.com/wiki/llbxg/hundun/image/show_recurrence_plot2.png)
 
 
-### [calc_les](https://github.com/llbxg/hundun/wiki/Lyapunov-exponents#calc_les)
+### [`calc_les`](https://github.com/llbxg/hundun/wiki/Lyapunov-exponents#calc_les)
 ![image:calc_les](https://raw.githubusercontent.com/wiki/llbxg/hundun/image/calc_les-Henon.png)
 
 
-### [calc_les](https://github.com/llbxg/hundun/wiki/Lyapunov-exponents#calc_les)
+### [`calc_les`](https://github.com/llbxg/hundun/wiki/Lyapunov-exponents#calc_les)
 ![image:calc_les](https://raw.githubusercontent.com/wiki/llbxg/hundun/image/calc_les-Lorenz.png)
