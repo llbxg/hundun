@@ -160,7 +160,7 @@ class Drawing(object):
         return d
 
     @classmethod
-    def trajectory_3d(cls, u_seq, shadow=True, *args, **kargs):
+    def trajectory_3d(cls, u_seq, shadow=True, interval=30, *args, **kargs):
 
         x, y, z = u_seq[:, 0], u_seq[:, 1], u_seq[:, 2]
         u_left = _np.min(u_seq, axis=0)
@@ -232,7 +232,7 @@ class Drawing(object):
             return main_plot,
 
         init()
-        ani = _anm.FuncAnimation(d.fig, func=update, init_func=init,
-                                 interval=30, blit=True, save_count=len(x))
+        ani = _anm.FuncAnimation(d.fig, func=update, init_func=init, blit=True,
+                                 interval=interval, save_count=len(x))
 
         return d, ani
