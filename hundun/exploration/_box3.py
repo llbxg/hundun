@@ -160,7 +160,7 @@ class CalcDimension(object):
 
     @staticmethod
     def make_edges(a, ep):
-        return _np.arange(_np.min(a)-ep, _np.max(a)+ep, ep)
+        return _np.arange(_np.min(a)-ep, _np.max(a)+2*ep, ep)
 
     @staticmethod
     def check_dim(u_seq):
