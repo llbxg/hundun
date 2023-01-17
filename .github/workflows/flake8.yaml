@@ -15,4 +15,4 @@ jobs:
           python-version: '3.8'
           cache: 'pip'
       - run: pip install flake8
-      - run: flake8 beautifulmonster
+      - run: flake8 hundun
