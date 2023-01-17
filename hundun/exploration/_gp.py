@@ -45,9 +45,9 @@ def calc_correlation_dimention_w_gp(e_seq,
     correlation_max, slope = 0, None
     for i in range(len(crs)-batch_ave):
         log_cr, log_r = _np.log(crs[i:i+batch_ave]), _np.log(rs[i:i+batch_ave])
-        correlation = _np.corrcoef(log_cr, log_r)[0,1]
+        correlation = _np.corrcoef(log_cr, log_r)[0, 1]
         if (correlation >= 0.999) and (correlation > correlation_max):
-            slope, _ = _np.polyfit(log_r, log_cr ,1)
+            slope, _ = _np.polyfit(log_r, log_cr, 1)
             correlation_max = correlation
 
     return slope, rs, crs

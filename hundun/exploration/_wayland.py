@@ -10,8 +10,8 @@ from ._utils import (embedding_seq as _embedding_seq,
 from ..utils import Drawing as _Drawing
 
 
-def wayland(u_seq, K=4, tau=5, Q=10, M = 51, D_max=10, reshapemode=True):
-    _, median_e_trans_ave= est_dimension_w_wayland(
+def wayland(u_seq, K=4, tau=5, Q=10, M=51, D_max=10, reshapemode=True):
+    _, median_e_trans_ave = est_dimension_w_wayland(
         u_seq=u_seq, T=1, D_max=D_max,
         tau=tau, K=K, Q=Q, M=51, reshape=reshapemode,
         plot=False)
@@ -54,12 +54,13 @@ def est_dimension_w_wayland(u_seq, T, D_max=10,
 
     if plot:
         d = _Drawing()
-        d[0,0].plot(range(1, len(median_e_trans_ave)+1), median_e_trans_ave,
-                    marker='.', markersize=5, color='tab:blue', zorder=5)
-        d[0,0].scatter(median_e_trans_ave.argmin()+1, median_e_trans_ave.min(),
+        d[0, 0].plot(range(1, len(median_e_trans_ave)+1), median_e_trans_ave,
+                     marker='.', markersize=5, color='tab:blue', zorder=5)
+        d[0, 0].scatter(median_e_trans_ave.argmin()+1,
+                        median_e_trans_ave.min(),
                         s=70, color='red', zorder=10)
-        d[0,0].set_axis_label('Dimension', 'median(E_{trans})')
-        d[0,0].set_yscale('log')
+        d[0, 0].set_axis_label('Dimension', 'median(E_{trans})')
+        d[0, 0].set_yscale('log')
         if path_save_plot is not None:
             d.save(path_save_plot)
         d.show()

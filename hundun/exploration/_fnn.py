@@ -8,6 +8,7 @@ from scipy.spatial.distance import cdist as _cdist
 from ._utils import embedding as _embedding
 from ..utils import Drawing as _Drawing
 
+
 def _dist(seq):
     return _cdist(seq, seq, metric='euclidean')
 
@@ -50,19 +51,20 @@ def est_dimension_w_fnn(u_seq, T, D_max=10,
 
     percentages = _np.array(percentage_list)*100
     dranges = _np.arange(1, len(percentages)+1)
-    dimension = dranges[percentages<threshold_percent][0]
+    dimension = dranges[percentages < threshold_percent][0]
 
     if plot:
         d = _Drawing()
-        d[0,0].plot(dranges, percentages,
-                    marker='.', markersize=5, color='tab:blue', zorder=5)
-        d[0,0].axhline(threshold_percent,
-                       color='black', linestyle='dashed', linewidth=0.5,
-                       zorder=0)
-        d[0,0].scatter(dimension, percentages[dimension-1],
-                       s=70, color='red', zorder=10)
+        d[0, 0].plot(dranges, percentages,
+                     marker='.', markersize=5, color='tab:blue', zorder=5)
+        d[0, 0].axhline(threshold_percent,
+                        color='black', linestyle='dashed', linewidth=0.5,
+                        zorder=0)
+        d[0, 0].scatter(dimension, percentages[dimension-1],
+                        s=70, color='red', zorder=10)
 
-        d[0,0].set_axis_label('Embedding~Dimension', r'False~NN~Percentage~[\%]')
+        d[0, 0].set_axis_label('Embedding~Dimension',
+                               r'False~NN~Percentage~[\%]')
         if path_save_plot is not None:
             d.save(path_save_plot)
         d.show()

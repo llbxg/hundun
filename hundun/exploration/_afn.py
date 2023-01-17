@@ -60,7 +60,7 @@ def est_dimension_w_afn(u_seq, T, D_max=10,
 
     dimension_list = []
     for E, threshold in zip(E_list, [threshold_E1, threshold_E2]):
-        if len(rule:=(E>threshold)) > 0:
+        if len(rule := (E > threshold)) > 0:
             dim = dranges[rule][0]
         else:
             dim = None
@@ -73,17 +73,17 @@ def est_dimension_w_afn(u_seq, T, D_max=10,
                                             ['E1', 'E2'],
                                             dimension_list):
             if dim is not None:
-                d[0,0].scatter(dim, E[dim-1],
-                               s=70, color='red', zorder=10)
+                d[0, 0].scatter(dim, E[dim-1],
+                                s=70, color='red', zorder=10)
 
-            d[0,0].plot(dranges, E, label=label,
-                        marker='.', markersize=5, zorder=5)
+            d[0, 0].plot(dranges, E, label=label,
+                         marker='.', markersize=5, zorder=5)
 
-            d[0,0].axhline(threshold,
-                           color='black', linestyle='dashed', linewidth=0.5,
-                           zorder=0)
-        d[0,0].legend()
-        d[0,0].set_axis_label('Embedding~Dimension', r'E1~&~E2')
+            d[0, 0].axhline(threshold,
+                            color='black', linestyle='dashed', linewidth=0.5,
+                            zorder=0)
+        d[0, 0].legend()
+        d[0, 0].set_axis_label('Embedding~Dimension', r'E1~&~E2')
         if path_save_plot is not None:
             d.save(path_save_plot)
         d.show()

@@ -58,6 +58,6 @@ def solve_simple(f, t0, u0, n_loop, *, h=0.01, solver=RK4):
     u = _np.array(u0)
     t_seq = [t0 + i*h for i in range(n_loop)]
 
-    u_seq = _np.array([u0, *[u := sol(t, u) for t in t_seq]])
+    u_seq = _np.array([u0, *[u := sol(t, u) for t in t_seq]])  # noqa:
     t_seq = _np.array([*t_seq, t0 + n_loop*h])
     return t_seq, u_seq

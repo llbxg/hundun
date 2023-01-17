@@ -25,7 +25,7 @@ class Synchronization(_ABC):
     def set_model(self, shift=0):
         dq = _deque([self.leading, self.supporting])
         dq.rotate(shift)
-        self._cyc =_cycle(dq)
+        self._cyc = _cycle(dq)
         return self._cyc
 
     def _sync(self):
@@ -53,7 +53,7 @@ class Synchronization(_ABC):
 
 def _make_parameter(func, params):
     signals = _getfullargspec(func).args
-    params = {s:p for s, p in zip(signals[3:], params)}
+    params = {s: p for s, p in zip(signals[3:], params)}
     params['f'] = func
     return params
 

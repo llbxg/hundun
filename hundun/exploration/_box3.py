@@ -7,17 +7,17 @@ from ..utils import Drawing as _Drawing
 
 
 class _DimensionResult(_NamedTuple):
-    dimension : float  # 次元
-    idx_dimension : int  # 最も相関係数が高かった時のインデックス
+    dimension: float  # 次元
+    idx_dimension: int  # 最も相関係数が高かった時のインデックス
 
-    min_correlation : float #
-    correlations : _np.ndarray  # 相関係数
-    slopes : _np.ndarray  # 1次関数によるフィッテイング時の傾き
+    min_correlation: float
+    correlations: _np.ndarray  # 相関係数
+    slopes: _np.ndarray  # 1次関数によるフィッテイング時の傾き
     intercepts: _np.ndarray  # 1次関数によるフィッテイング時の切片
 
-    log_frac_1_eps : _np.ndarray
-    log_Ns : _np.ndarray
-    dimensions : _np.ndarray  # 定義に沿った容量次元
+    log_frac_1_eps: _np.ndarray
+    log_Ns: _np.ndarray
+    dimensions: _np.ndarray  # 定義に沿った容量次元
 
 
 class CalcDimension(object):
@@ -48,7 +48,7 @@ class CalcDimension(object):
         accuracies, values = self.calc()
 
         log_accuracies = self.wrap_accuracies_in_main(accuracies)
-        new_values =  self.wrap_value_in_main(values)
+        new_values = self.wrap_value_in_main(values)
         dimensions = new_values / log_accuracies
 
         correlations, slopes, intercepts = \
@@ -95,9 +95,10 @@ class CalcDimension(object):
             value_list = []
             for z_left in zedges:
                 z_right = z_left + epsilon
-                new_u_seq = self.u_seq[(z_left<z) & (z<=z_right)]
+                new_u_seq = self.u_seq[(z_left < z) & (z <= z_right)]
                 new_x, new_y = new_u_seq[:, 0], new_u_seq[:, 1]
-                value_list.append(self.func_for_2dim(new_x, new_y, xedges, yedges))
+                value_list.append(self.func_for_2dim(new_x, new_y,
+                                                     xedges, yedges))
             value = self.wrap_value_3dim(value_list)
 
         else:
@@ -116,7 +117,7 @@ class CalcDimension(object):
 
     def _decide_idx_ref_mode(self, correlations):
         correlations_over = _np.where(
-            correlations>=self.min_correlation, correlations, 0)
+            correlations >= self.min_correlation, correlations, 0)
 
         idx = int(_np.argmax(correlations_over))
 
@@ -127,7 +128,8 @@ class CalcDimension(object):
         correlation_list, slope_list, intercept_list = [], [], []
 
         for i in range(len(h_seq)-batch_ave):
-            h_seq_batch, v_seq_batch = h_seq[i:i+batch_ave], v_seq[i:i+batch_ave]
+            h_seq_batch, v_seq_batch = (h_seq[i:i+batch_ave],
+                                        v_seq[i:i+batch_ave])
 
             correlation = _np.corrcoef(h_seq_batch, v_seq_batch)[0, 1]
             correlation_list.append(correlation)
@@ -164,7 +166,7 @@ class CalcDimension(object):
 
     @staticmethod
     def check_dim(u_seq):
-        if len(u_seq.shape)==1:
+        if len(u_seq.shape) == 1:
             u_seq = u_seq.reshape(len(u_seq), 1)
         return u_seq.shape[1], u_seq
 
@@ -183,11 +185,11 @@ class Capacity(CalcDimension):
 
     def func_for_1dim(self, x, xedges):
         H, _ = _np.histogram(x, bins=xedges)
-        return _np.sum(H>0)
+        return _np.sum(H > 0)
 
     def func_for_2dim(self, x, y, xedges, yedges):
-        H, _, _ =  _np.histogram2d(x, y, bins=(xedges, yedges))
-        return _np.sum(H>0)
+        H, _, _ = _np.histogram2d(x, y, bins=(xedges, yedges))
+        return _np.sum(H > 0)
 
 
 class Information(CalcDimension):
@@ -195,12 +197,12 @@ class Information(CalcDimension):
     def func_for_1dim(self, x, xedges):
         H, _ = _np.histogram(x, bins=xedges)
         p = H/self.length
-        return p[p>0]
+        return p[p > 0]
 
     def func_for_2dim(self, x, y, xedges, yedges):
-        H, _, _ =  _np.histogram2d(x, y, bins=(xedges, yedges))
+        H, _, _ = _np.histogram2d(x, y, bins=(xedges, yedges))
         p = H/self.length
-        return p[p>0]
+        return p[p > 0]
 
     @staticmethod
     def wrap_value(p):
@@ -240,11 +242,13 @@ class Correlation(CalcDimension):
         return accuracies, _np.array(crs)
 
     def decide_dimension(self, idx, dimensions):
-        return _np.average(self.slopes[self.min_correlation<=self.correlations])
+        return _np.average(self.slopes[
+            self.min_correlation <= self.correlations])
 
     @staticmethod
     def wrap_value_in_main(values):
         return -_np.log(values)
+
 
 def _dist(a, b):
     return _np.linalg.norm(a - b)
@@ -294,7 +298,7 @@ def calc_dimension_correlation(u_seq, depsilon=0.02, base=7, loop=250,
 
 
 def _plot(result, batch, path_save_plot, q):
-    color = {'b':'tab:blue', 'o':'tab:orange', 'g':'tab:green'}
+    color = {'b': 'tab:blue', 'o': 'tab:orange', 'g': 'tab:green'}
     label_vertical_list = [r'$\ln N(\epsilon)$', r'$H(\epsilon)$',
                            r'$- \ln C(\epsilon)$']
     label_eq_list = [
@@ -322,43 +326,43 @@ def _plot(result, batch, path_save_plot, q):
     s_batch = slice(idx, idx+batch)
 
     d = _Drawing(3, 2, number=True, figsize=(3.14*1.7*2, 3.14*2),
-                number_place=(0.96, 0.04), number_size=10)
+                 number_place=(0.96, 0.04), number_size=10)
 
     label_D = f'$D_{q}$'
 
-    d[0,0].scatter(x, log_Ns, s=3, color=color['b'])
-    d[0,0].scatter(x[s_batch], log_Ns[s_batch], s=3, color=color['o'])
-    d[0,0].plot(x_lr, y, color=color['o'], linewidth=0.5)
+    d[0, 0].scatter(x, log_Ns, s=3, color=color['b'])
+    d[0, 0].scatter(x[s_batch], log_Ns[s_batch], s=3, color=color['o'])
+    d[0, 0].plot(x_lr, y, color=color['o'], linewidth=0.5)
 
     if q != 2:
-        d[1,0].scatter(x, dimensions, s=3, color=color['b'],
-                       label=label_eq_list[q])
+        d[1, 0].scatter(x, dimensions, s=3, color=color['b'],
+                        label=label_eq_list[q])
 
-    d[1,0].scatter(x[:-batch], slopes, s=3, color='tab:green', label='slope')
-    d[1,0].axhline(a, color=color['o'], linewidth=0.5, linestyle='dashed')
+    d[1, 0].scatter(x[:-batch], slopes, s=3, color='tab:green', label='slope')
+    d[1, 0].axhline(a, color=color['o'], linewidth=0.5, linestyle='dashed')
 
-    d[2,0].scatter(x[:-batch], correlations, s=3, color=color['b'])
-    d[2,0].scatter(x[idx],correlations[idx], color=color['o'])
+    d[2, 0].scatter(x[:-batch], correlations, s=3, color=color['b'])
+    d[2, 0].scatter(x[idx], correlations[idx], color=color['o'])
 
-    d[2,0].axhline(1, color='black', linestyle='dashed',linewidth=0.5)
-    d[2,0].axhline(min_correlation, color='black', linestyle='dashed',
-                   linewidth=0.5)
+    d[2, 0].axhline(1, color='black', linestyle='dashed', linewidth=0.5)
+    d[2, 0].axhline(min_correlation, color='black', linestyle='dashed',
+                    linewidth=0.5)
 
-    d[0,0].set_ylabel(label_vertical_list[q])
-    d[1,0].set_ylabel(label_D)
-    d[1,0].legend(loc='lower left')
-    d[2,0].set_ylim(min_correlation-(1-min_correlation)/10, 1.0001)
+    d[0, 0].set_ylabel(label_vertical_list[q])
+    d[1, 0].set_ylabel(label_D)
+    d[1, 0].legend(loc='lower left')
+    d[2, 0].set_ylim(min_correlation-(1-min_correlation)/10, 1.0001)
     if q != 1:
-        d[2,0].set_axis_label(r'\ln \frac{1}{\epsilon}', r'correlation')
+        d[2, 0].set_axis_label(r'\ln \frac{1}{\epsilon}', r'correlation')
     else:
-        d[2,0].set_axis_label(r'\log_2 \frac{1}{\epsilon}', r'correlation')
+        d[2, 0].set_axis_label(r'\log_2 \frac{1}{\epsilon}', r'correlation')
     for i in range(3):
-        d[i,0].set_xlim(min(x), max(x))
+        d[i, 0].set_xlim(min(x), max(x))
 
-    if idx<batch:
+    if idx < batch:
         s = slice(idx, idx+batch*2)
         s2 = slice(0, idx+batch*2)
-    elif idx>len(correlations)-2*batch:
+    elif idx > len(correlations)-2*batch:
         s = slice(idx-batch, len(correlations))
         s2 = slice(idx-batch, len(x))
     else:
@@ -366,30 +370,29 @@ def _plot(result, batch, path_save_plot, q):
 
     x_lr = [x[s2][0], x[s2][-1]]
 
-    d[0,1].scatter(x[s2], log_Ns[s2])
-    d[0,1].scatter(x[s_batch], log_Ns[s_batch])
-    d[0,1].plot(x_lr, poly(x_lr), color=color['o'])
+    d[0, 1].scatter(x[s2], log_Ns[s2])
+    d[0, 1].scatter(x[s_batch], log_Ns[s_batch])
+    d[0, 1].plot(x_lr, poly(x_lr), color=color['o'])
 
-    if q!=2:
-        d[1,1].scatter(x[s2], dimensions[s2], color=color['b'])
-    d[1,1].scatter(x[s], slopes[s], color='tab:green')
-    d[1,1].axhline(a, color=color['o'], linestyle='dashed')
+    if q != 2:
+        d[1, 1].scatter(x[s2], dimensions[s2], color=color['b'])
+    d[1, 1].scatter(x[s], slopes[s], color='tab:green')
+    d[1, 1].axhline(a, color=color['o'], linestyle='dashed')
 
-    d[2,1].scatter(x[s], correlations[s])
-    d[2,1].scatter(x[idx], correlations[idx])
-    d[2,1].axhline(1, color='black', linestyle='dashed')
-    d[2,1].axhline(min_correlation, color='black', linestyle='dashed')
+    d[2, 1].scatter(x[s], correlations[s])
+    d[2, 1].scatter(x[idx], correlations[idx])
+    d[2, 1].axhline(1, color='black', linestyle='dashed')
+    d[2, 1].axhline(min_correlation, color='black', linestyle='dashed')
 
-
-    d[0,1].set_ylabel(label_vertical_list[q])
-    d[1,1].set_ylabel(label_D)
-    if q!=1:
-        d[2,1].set_axis_label(r'\ln \frac{1}{\epsilon}', r'correlation')
+    d[0, 1].set_ylabel(label_vertical_list[q])
+    d[1, 1].set_ylabel(label_D)
+    if q != 1:
+        d[2, 1].set_axis_label(r'\ln \frac{1}{\epsilon}', r'correlation')
     else:
-        d[2,1].set_axis_label(r'\log_2 \frac{1}{\epsilon}', r'correlation')
-    d[2,1].set_ylim(min_correlation-(1-min_correlation), 1.0001)
+        d[2, 1].set_axis_label(r'\log_2 \frac{1}{\epsilon}', r'correlation')
+    d[2, 1].set_ylim(min_correlation-(1-min_correlation), 1.0001)
     for i in range(3):
-        d[i,1].set_xlim(min(x_lr), max(x_lr))
+        d[i, 1].set_xlim(min(x_lr), max(x_lr))
 
     if path_save_plot is not None:
         d.save(path_save_plot)

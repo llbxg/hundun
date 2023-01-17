@@ -19,7 +19,7 @@ def calc_les_difference_dim_geq_2(difference, N, n_average=100):
 
     Q, R = _np.linalg.qr(difference.j())
 
-    R_list= [_np.diag(R)]
+    R_list = [_np.diag(R)]
     les = [_np.log(_np.abs(_np.diag(R)))]
     for _ in range(N):
         difference.solve(*difference.internal_state)
@@ -39,8 +39,9 @@ def calc_les_difference_dim_1(difference, N, n_average=100):
         difference.solve(*difference.internal_state)
         le_list.append(_np.log(_np.abs(difference.j())))
     le_list = _np.array(
-        [le/i for i, le in enumerate(_accumulate(le_list, _add), 1) ])
+        [le/i for i, le in enumerate(_accumulate(le_list, _add), 1)])
     return le_list, _np.array([_np.average(le_list[-n_average:])])
+
 
 def _make_model(difference, u0=None, **options):
     if u0 is None:

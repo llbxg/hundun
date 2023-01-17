@@ -8,12 +8,13 @@ from ._utils import (bartlett as _bartlett,
                      reshape as _reshape)
 from ..utils import Drawing as _Drawing
 
+
 def _autocovariance_function(dim, u_seq, u_bar, tau, N):
 
     value = _np.zeros(dim)
 
     for t in range(N-1-tau):
-        value+= (u_seq[t]-u_bar)*(u_seq[t+tau]-u_bar)
+        value += (u_seq[t]-u_bar)*(u_seq[t+tau]-u_bar)
 
     return value/(N-tau)
 
@@ -48,16 +49,17 @@ def est_lag_w_acf(u_seq, tau_max, alpha=0.95,
         d = _Drawing()
         for i, idx in enumerate(idx_list):
             c = next(color)['color']
-            d[0,0].plot(var_seq[:, i],
-                        label=f'standard error - {i}', color=c, linestyle='dashed')
-            d[0,0].stem(rho_seq[:, i], label=f'acf - {i}',
-                        markerfmt='.', linefmt=c, use_line_collection=True)
-            d[0,0].scatter(idx, rho_seq[idx, i],
-                           zorder=10, marker='o', color='red', s=20)
+            d[0, 0].plot(var_seq[:, i],
+                         label=f'standard error - {i}', color=c,
+                         linestyle='dashed')
+            d[0, 0].stem(rho_seq[:, i], label=f'acf - {i}',
+                         markerfmt='.', linefmt=c, use_line_collection=True)
+            d[0, 0].scatter(idx, rho_seq[idx, i],
+                            zorder=10, marker='o', color='red', s=20)
 
-        d[0,0].legend()
-        d[0,0].set_axis_label('Time~lag', 'Correlation~coefficient')
-        d[0,0].set_xlim(0, tau_max-1)
+        d[0, 0].legend()
+        d[0, 0].set_axis_label('Time~lag', 'Correlation~coefficient')
+        d[0, 0].set_xlim(0, tau_max-1)
         if path_save_plot is not None:
             d.save(path_save_plot)
         d.show()

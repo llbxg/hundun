@@ -1,5 +1,6 @@
 from ..systems._difference import Difference as _Difference
 
+
 class Henon(_Difference):
 
     def parameter(self, a=1.4, b=0.3):
@@ -21,4 +22,3 @@ class Henon(_Difference):
              [self.b,      0]]
 
         return j
-

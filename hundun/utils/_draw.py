@@ -1,5 +1,4 @@
 from functools import partial as _partial
-from os import path as _path
 
 from matplotlib import rcParams as _rcParams
 import matplotlib.animation as _anm
@@ -11,41 +10,41 @@ from itertools import cycle as _cycle
 
 
 config_drawing = {
-    'figure.subplot.hspace':0.4,
+    'figure.subplot.hspace': 0.4,
 
-    'lines.linewidth':0.8,
+    'lines.linewidth': 0.8,
 
-    'font.family':['Times New Roman', 'sans-serif'],
-    'font.size':8,
+    'font.family': ['Times New Roman', 'sans-serif'],
+    'font.size': 8,
 
-    'xtick.direction':'in',
-    'xtick.major.width':0.5,
-    'xtick.major.size':2.5,
-    'xtick.major.pad':7,
-    'ytick.direction':'in',
-    'ytick.major.width':0.5,
-    'ytick.major.size':2.5,
+    'xtick.direction': 'in',
+    'xtick.major.width': 0.5,
+    'xtick.major.size': 2.5,
+    'xtick.major.pad': 7,
+    'ytick.direction': 'in',
+    'ytick.major.width': 0.5,
+    'ytick.major.size': 2.5,
 
-    'ytick.right':True,
-    'xtick.top':True,
+    'ytick.right': True,
+    'xtick.top': True,
 
     'axes.linewidth': 0.5,
 
     'axes.titlesize': 12,
 
     'axes.labelsize': 12,
-    'mathtext.fontset':'cm',
+    'mathtext.fontset': 'cm',
 
-    'scatter.marker':'.',
+    'scatter.marker': '.',
 
-    'axes.labelpad':10,
+    'axes.labelpad': 10,
 
-    'legend.fancybox':False,
-    'legend.edgecolor':'black',
-    'legend.borderpad':0.5,
-    'patch.linewidth':0.5,
+    'legend.fancybox': False,
+    'legend.edgecolor': 'black',
+    'legend.borderpad': 0.5,
+    'patch.linewidth': 0.5,
 
-    'grid.linewidth':0.5
+    'grid.linewidth': 0.5
     }
 
 
@@ -85,9 +84,7 @@ class Drawing(object):
             _plt.subplots_adjust(wspace=0.4)
 
         if space is not None:
-            _plt.subplots_adjust(wspace=space[0] ,hspace=space[1])
-
-
+            _plt.subplots_adjust(wspace=space[0], hspace=space[1])
 
         axis = []
         for j in range(1, rows*cols+1):
@@ -95,7 +92,7 @@ class Drawing(object):
             kwargs = dict()
 
             if j in three:
-                kwargs['projection']='3d'
+                kwargs['projection'] = '3d'
 
             ax = fig.add_subplot(*s, **kwargs)
             axis.append(ax)
@@ -110,11 +107,11 @@ class Drawing(object):
                 ax.set_title(f'({next(alphabets)})', x=x, y=y, fontsize=size)
 
         for ax in axis.flatten():
-            ax.set_axis_label =  _partial(_set_axis_label, ax)
+            ax.set_axis_label = _partial(_set_axis_label, ax)
 
         self.fig, self.ax = fig, axis
 
-    def __getitem__(self,key):
+    def __getitem__(self, key):
         return self.ax[key]
 
     def cmap(self, cmap='viridis'):
@@ -133,7 +130,7 @@ class Drawing(object):
         _plt.close()
 
     @classmethod
-    def plot_a_and_b(cls, u_seq_a , u_seq_b=None, /, legend=True,
+    def plot_a_and_b(cls, u_seq_a, u_seq_b=None, /, legend=True,
                      color=None, name=None, u_seq_more=[], *args, **kwargs):
         d = cls(1, 2, *args, **kwargs)
         ax_label = ['x', 'y', 'z']
@@ -144,15 +141,15 @@ class Drawing(object):
                             else [u_seq_a, u_seq_b, *u_seq_more])
             for u_seq in new_seq_list:
                 c, n = next(color_cycle), next(name_cycle)
-                d[0,i].plot(u_seq[:, a], u_seq[:, b], color=c, label=f'${n}$')
-                d[0,i].scatter(u_seq[0, a], u_seq[0, b],
-                               color=c, s=40, marker='o',
-                               zorder=10, edgecolor='white')
-                d[0,i].scatter(u_seq[-1, a], u_seq[-1, b],
-                               color=c, s=40, marker='s',
-                               zorder=10, edgecolor='white')
+                d[0, i].plot(u_seq[:, a], u_seq[:, b], color=c, label=f'${n}$')
+                d[0, i].scatter(u_seq[0, a], u_seq[0, b],
+                                color=c, s=40, marker='o',
+                                zorder=10, edgecolor='white')
+                d[0, i].scatter(u_seq[-1, a], u_seq[-1, b],
+                                color=c, s=40, marker='s',
+                                zorder=10, edgecolor='white')
 
-            d[0,i].set_axis_label(ax_label[a], ax_label[b])
+            d[0, i].set_axis_label(ax_label[a], ax_label[b])
 
         if legend:
             d[0, 0].legend()
@@ -168,37 +165,37 @@ class Drawing(object):
         scale = (u_right - u_left)/3
         u_left, u_right = u_left - scale, u_right + scale
 
-        config_drawing['axes.labelsize']=20
-        config_drawing['axes.labelpad']=0
-        kargs['config']=config_drawing
+        config_drawing['axes.labelsize'] = 20
+        config_drawing['axes.labelpad'] = 0
+        kargs['config'] = config_drawing
 
         d = cls(1, 1, three=True, *args, **kargs)
 
-        main_plot, = d[0,0].plot([], [], [], color='blue', linewidth=0.2)
-        sub_plot, = d[0,0].plot([], [], [], color='red', linestyle="",
-                                marker="o", markersize=1)
+        main_plot, = d[0, 0].plot([], [], [], color='blue', linewidth=0.2)
+        sub_plot, = d[0, 0].plot([], [], [], color='red', linestyle="",
+                                 marker="o", markersize=1)
 
         if shadow:
-            setting = {'linewidth':0.1, 'color': 'gray'}
-            shadow_plot_1, = d[0,0].plot([], [],  [], **setting)
-            shadow_plot_2, = d[0,0].plot([], [],  [], **setting)
-            shadow_plot_3, = d[0,0].plot([], [],  [], **setting)
+            setting = {'linewidth': 0.1, 'color': 'gray'}
+            shadow_plot_1, = d[0, 0].plot([], [],  [], **setting)
+            shadow_plot_2, = d[0, 0].plot([], [],  [], **setting)
+            shadow_plot_3, = d[0, 0].plot([], [],  [], **setting)
 
         def update(frame):
             s1 = slice(frame-1, frame+4)
-            main_plot.set_data (x[0:frame], y[0:frame])
+            main_plot.set_data(x[0:frame], y[0:frame])
             main_plot.set_3d_properties(z[0:frame])
 
             sub_plot.set_data(x[s1], y[s1])
             sub_plot.set_3d_properties(z[s1])
 
-            s = slice(0,frame+5)
-            l = len(x[s])
+            s = slice(0, frame+5)
+            length = len(x[s])
             if shadow:
                 plot_list = [shadow_plot_1, shadow_plot_2, shadow_plot_3]
-                g_list = [(x[s], y[s], _np.full(l, u_left[2])),
-                          (x[s],  _np.full(l, u_left[1]), z[s]),
-                          (_np.full(l, u_right[0]), y[s], z[s])]
+                g_list = [(x[s], y[s], _np.full(length, u_left[2])),
+                          (x[s],  _np.full(length, u_left[1]), z[s]),
+                          (_np.full(length, u_right[0]), y[s], z[s])]
                 for p, (x_s, y_s, z_s) in zip(plot_list, g_list):
                     p.set_data(x_s, y_s)
                     p.set_3d_properties(z_s)
@@ -208,26 +205,26 @@ class Drawing(object):
                 return main_plot, sub_plot
 
         def init():
-            d[0,0].set_xlim(u_left[0], u_right[0])
-            d[0,0].set_ylim(u_left[1], u_right[1])
-            d[0,0].set_zlim(u_left[2], u_right[2])
-            d[0,0].xaxis.pane.set_facecolor("white")
-            d[0,0].yaxis.pane.set_facecolor("white")
-            d[0,0].zaxis.pane.set_facecolor("white")
-            d[0,0].xaxis.pane.set_edgecolor('black')
-            d[0,0].yaxis.pane.set_edgecolor('black')
-            d[0,0].zaxis.pane.set_edgecolor('black')
-            d[0,0].xaxis.line.set_linewidth(0.2)
-            d[0,0].yaxis.line.set_linewidth(0.2)
-            d[0,0].zaxis.line.set_linewidth(0.2)
+            d[0, 0].set_xlim(u_left[0], u_right[0])
+            d[0, 0].set_ylim(u_left[1], u_right[1])
+            d[0, 0].set_zlim(u_left[2], u_right[2])
+            d[0, 0].xaxis.pane.set_facecolor("white")
+            d[0, 0].yaxis.pane.set_facecolor("white")
+            d[0, 0].zaxis.pane.set_facecolor("white")
+            d[0, 0].xaxis.pane.set_edgecolor('black')
+            d[0, 0].yaxis.pane.set_edgecolor('black')
+            d[0, 0].zaxis.pane.set_edgecolor('black')
+            d[0, 0].xaxis.line.set_linewidth(0.2)
+            d[0, 0].yaxis.line.set_linewidth(0.2)
+            d[0, 0].zaxis.line.set_linewidth(0.2)
 
-            d[0,0].set_axis_label('x', 'y', 'z')
-            d[0,0].grid(False)
-            d[0,0].set_xticks([])
-            d[0,0].set_yticks([])
-            d[0,0].set_zticks([])
+            d[0, 0].set_axis_label('x', 'y', 'z')
+            d[0, 0].grid(False)
+            d[0, 0].set_xticks([])
+            d[0, 0].set_yticks([])
+            d[0, 0].set_zticks([])
 
-            d[0,0].view_init(azim=127,elev=27)
+            d[0, 0].view_init(azim=127, elev=27)
 
             return main_plot,
 

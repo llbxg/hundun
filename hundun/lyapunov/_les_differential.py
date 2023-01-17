@@ -5,7 +5,7 @@ import numpy as _np
 
 
 def sorting(_les_seq, _les, dim):
-    l = [(_les[i], _les_seq[:, i]) for i in range(dim)]
+    l = [(_les[i], _les_seq[:, i]) for i in range(dim)]  # noqa:
     return _np.array([s[1] for s in l]).T, _np.array([s[0] for s in l])
 
 
@@ -19,18 +19,18 @@ def calc_les_differential(differential, **options):
 
 
 def calc_les_differential_w_qr(differential,
-                h=0.001, N=100000, u0=None, n_average=100,
-                dynamic_para=None,
-                error_func=False,
-                dynamic_func=False,
-                **options):
+                               h=0.001, N=100000, u0=None, n_average=100,
+                               dynamic_para=None,
+                               error_func=False,
+                               dynamic_func=False,
+                               **options):
 
     model = _make_model(differential, h=h, u0=u0, **options)
 
     if error_func or dynamic_func:
         jacobian = model.dynamic_jacobian
         func_solve = lambda t, u, **option : \
-            model.solve(t, u, f=model.dynamic_eq, **option)
+            model.solve(t, u, f=model.dynamic_eq, **option)  # noqa:
     else:
         jacobian = model.j
         func_solve = model.solve
@@ -56,17 +56,18 @@ def calc_les_differential_w_qr(differential,
 
 
 def calc_max_le_differential(differential,
-                     h=0.01, N=10000, u0=None, n_average=100, n_split=10,
-                     dynamic_para=None,
-                     error_func=False,
-                     dynamic_func=False,
-                     **options):
+                             h=0.01, N=10000, u0=None, n_average=100,
+                             n_split=10,
+                             dynamic_para=None,
+                             error_func=False,
+                             dynamic_func=False,
+                             **options):
 
     model = _make_model(differential, u0=u0, h=h, **options)
 
-    if error_func  or dynamic_func:
-        func_solve = lambda t, u, **option : \
-            model.solve(t, u, f=model.dynamic_eq, **option)
+    if error_func or dynamic_func:
+        func_solve = lambda t, u, **option: \
+            model.solve(t, u, f=model.dynamic_eq, **option)  # noqa:
     else:
         func_solve = model.solve
 
@@ -98,7 +99,7 @@ def calc_max_le_differential(differential,
         w_e = u - u_tilde
         v += _np.log(_np.linalg.norm(w_e)*(1/z_0))
 
-        T=(1/n_split)*(i+2)
+        T = (1/n_split)*(i+2)
         les_list.append(v/T)
 
         w_s = z_0/_np.linalg.norm(w_e)*w_e
@@ -108,17 +109,17 @@ def calc_max_le_differential(differential,
 
 
 def calc_les_differential_w_orth(differential,
-                  h=0.01, N=10000, u0=None, n_average=100,
-                  dynamic_para=None,
-                  error_func=False,
-                  dynamic_func=False,
-                  **options):
+                                 h=0.01, N=10000, u0=None, n_average=100,
+                                 dynamic_para=None,
+                                 error_func=False,
+                                 dynamic_func=False,
+                                 **options):
 
     model = _make_model(differential, u0=u0, h=h, **options)
 
     if error_func or dynamic_func:
-        func_solve = lambda t, u, **option : \
-            model.solve(t, u, f=model.dynamic_eq, **option)
+        func_solve = lambda t, u, **option: \
+            model.solve(t, u, f=model.dynamic_eq, **option)  # noqa:
     else:
         func_solve = model.solve
 
@@ -149,7 +150,7 @@ def calc_les_differential_w_orth(differential,
 
         for i in range(dim):
             on = _np.linalg.norm(d_0[i])
-            d_0[i] =  on * d_tau_bot[i]
+            d_0[i] = on * d_tau_bot[i]
             u_hat[i] = u_tilde + d_0[i]
 
         d_ups, d_downs = _np.ones(3), _np.ones(3)
@@ -159,16 +160,16 @@ def calc_les_differential_w_orth(differential,
 
             lm[i].append(_np.log(d_ups / d_downs))
 
-    calc_l = lambda l : [sum(l[:i])/(i*h) for i in range(1, len(l)+1)]
-    les_plus_list = [_np.array(calc_l(l)) for l in lm]
+    calc_l = lambda l: [sum(l[:i])/(i*h) for i in range(1, len(l)+1)]  # noqa:
+    les_plus_list = [_np.array(calc_l(l)) for l in lm]  # noqa:
 
     les_list = []
     les_list.append(les_plus_list[0])
     for i in range(1, dim):
         les_list.append(les_plus_list[i] - les_plus_list[i-1])
-    les_average = [_np.average(l[-n_average:]) for l in les_list]
+    les_average = [_np.average(les[-n_average:]) for les in les_list]
 
-    les_average=sorted(les_average, reverse=True)
+    les_average = sorted(les_average, reverse=True)
     return sorting(_np.array(les_list).T, les_average, dim)
 
 

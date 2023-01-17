@@ -1,5 +1,6 @@
 from ..systems._difference import Difference as _Difference
 
+
 class Logistic(_Difference):
 
     def parameter(self, a=4.0):

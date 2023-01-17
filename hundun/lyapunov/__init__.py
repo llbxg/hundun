@@ -6,6 +6,9 @@ from ._les_differential import (calc_les_differential,
 from ._les_difference import calc_les_difference
 
 
+__all__ = ['calc_lyapunov_dimension', 'calc_les_differential_w_qr',
+           'calc_max_le_differential', 'calc_les_differential_w_orth']
+
 # def
 
 import numpy as _np

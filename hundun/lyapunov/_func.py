@@ -6,7 +6,7 @@ import numpy as _np
 
 def _calc_lyapunov_dimension(les):
     sum_le = _np.array(list(_accumulate(les, _add)))
-    ok = les[sum_le>0]
+    ok = les[sum_le > 0]
     d = len(ok)
 
     return d + sum(ok)/_np.abs(les[d])
