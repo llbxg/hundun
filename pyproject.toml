@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=45"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hundun"
+description = "hundun is a python library for the exploration of chaos."
+readme = "README.md"
+license = {file = "LICENSE.txt"}
+authors = [{name = "kosh", email = "llllbxg@gmail.com"}]
+urls = {repository = "http://github.com/llbxg/hundun"}
+requires-python = ">=3.8"
+dependencies = [
+    "scipy",
+    "matplotlib",
+    "numpy",
+]
+dynamic = ["version"]
+classifiers = [
+   'Topic :: Scientific/Engineering :: Physics'
+]
+
+[project.optional-dependencies]
+dev = [
+    "flake8",
+    "setuptools_scm",
+    "wheel",
+    "build",
+    "twine"
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "hundun.__version__"}
